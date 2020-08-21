@@ -9,3 +9,8 @@ before_script:
   - gcloud auth activate-service-account --key-file /root/key.json
   - gcloud auth configure-docker --quiet
   - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
+
+stages:
+  - build
+  - test
+  - deploy
