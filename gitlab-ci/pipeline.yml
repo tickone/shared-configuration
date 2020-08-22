@@ -7,6 +7,11 @@ before_script:
   - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
   - rm -rf /root/key.json
 
+include:
+  - /env/test.yml
+  - /env/beta.yml
+  - /env/prod.yml
+
 stages:
   - build
   - test

@@ -1,0 +1,20 @@
+beta-build:
+  stage: build
+  only:
+    - master
+  script:
+    - docker build . -t $DOCKER_IMAGE_REPO:beta --build-arg BUILD=beta --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
+    - docker save $DOCKER_IMAGE_REPO:beta > image.tar
+  artifacts:
+    paths:
+      - image.tar
+    expire_in: 1 day
+beta-deploy:
+  stage: deploy
+  dependencies:
+    - beta-build
+  only:
+    - master
+  script:
+    - docker load < image.tar
+    - docker push $DOCKER_IMAGE_REPO:beta

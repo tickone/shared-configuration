@@ -1,0 +1,20 @@
+dev-build:
+  stage: build
+  only:
+    - dev
+  script:
+    - docker build . -t $DOCKER_IMAGE_REPO:latest --build-arg BUILD=test --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
+    - docker save $DOCKER_IMAGE_REPO:latest > image.tar
+  artifacts:
+    paths:
+      - image.tar
+    expire_in: 1 day
+dev-deploy:
+  stage: deploy
+  dependencies:
+    - dev-build
+  only:
+    - dev
+  script:
+    - docker load < image.tar
+    - docker push $DOCKER_IMAGE_REPO:latest
