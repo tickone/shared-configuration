@@ -8,9 +8,9 @@ before_script:
   - rm -rf /root/key.json
 
 include:
-  - /env/test.yml
-  - /env/beta.yml
-  - /env/prod.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod.yml
 
 stages:
   - build
