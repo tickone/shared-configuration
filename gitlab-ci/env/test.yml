@@ -1,20 +1,30 @@
-dev-build:
-  stage: build
+variables:
+  BUILD: test
+  TAG: latest
+
+include:
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
+
+test-web-build:
+  extends: .build
   only:
     - dev
-  script:
-    - docker build . -t $DOCKER_IMAGE_REPO:latest --build-arg BUILD=test --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
-    - docker save $DOCKER_IMAGE_REPO:latest > image.tar
-  artifacts:
-    paths:
-      - image.tar
-    expire_in: 1 day
-dev-deploy:
-  stage: deploy
+
+test-web-deploy:
+  extends: .deploy
   dependencies:
-    - dev-build
+    - test-web-build
   only:
     - dev
-  script:
-    - docker load < image.tar
-    - docker push $DOCKER_IMAGE_REPO:latest
+
+test-android-build:
+  extends: .build-android
+  only:
+    - dev
+
+test-android-deploy:
+  extends: .deploy-android
+  dependencies:
+    - test-android-build
+  only:
+    - dev

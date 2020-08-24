@@ -1,0 +1,38 @@
+.build:
+  stage: build
+  script:
+    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg BUILD=$BUILD --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
+    - docker save $DOCKER_IMAGE_REPO:$TAG > image.tar
+  artifacts:
+    paths:
+      - image.tar
+    expire_in: 1 day
+
+.deploy:
+  stage: deploy
+  script:
+    - docker load < image.tar
+  after_script:
+    - docker push $DOCKER_IMAGE_REPO:$TAG
+
+.android: &android
+  rules:
+    - when: ! -z $ANDROID_KEYSOTRE
+  variables:
+    APP_ENV=android
+
+.build-android:
+  extends: .build
+  script:
+    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg ANDROID_ALIAS=${ANDROID_ALIAS} --build-arg ANDROID_STORE_PASSWORD=${ANDROID_STORE_PASSWORD} --build-args ANDROID_KEYSTORE=${ANDROID_KEYSTORE} --build-arg BUILD=${BUILD} --build-arg APP_ENV=android
+    - docker save $DOCKER_IMAGE_REPO:$TAG > image.tar
+  <<: *android
+
+.deploy-android:
+  extends: .deploy
+  after_script:
+    - ID=$(docker create $DOCKER_IMAGE_REPO:$TAG)
+    - docker cp $ID:/app/platforms/android/app/build/outputs/apk/debug/apk-debug.apk .
+    - docker rm -f $ID
+    # cp apk to google cloud storage
+  <<: *android
