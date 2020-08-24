@@ -45,7 +45,7 @@
 
 .android:
   variables:
-    APP_ENV=android
+    APP_ENV: android
 
 .build-android:
   extends:
