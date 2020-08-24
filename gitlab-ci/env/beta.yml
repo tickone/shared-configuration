@@ -4,24 +4,30 @@ variables:
 
 beta-web-build:
   extends: .build
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'master'
+  only:
+    - master
 
 beta-web-deploy:
   extends: .deploy
   dependencies:
     - beta-web-build
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'master'
+  only:
+    - master
 
 beta-android-build:
   extends: .build-android
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'master'
+  only:
+    variables:
+      - $ANDROID_KEYSTORE
+    refs:
+      - master
 
 beta-android-deploy:
   extends: .deploy-android
   dependencies:
     - beta-android-build
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'master'
+  only:
+    variables:
+      - $ANDROID_KEYSTORE
+    refs:
+      - master

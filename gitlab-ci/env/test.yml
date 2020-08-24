@@ -1,26 +1,30 @@
 test-web-build:
   extends: .build
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'dev'
+  only:
+    - dev
 
 test-web-deploy:
   extends: .deploy
   dependencies:
     - test-web-build
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'dev'
+  only:
+    - dev
 
 test-android-build:
   extends: .build-android
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'dev'
-    - if: $ANDROID_KEYSTORE != null
+  only:
+    refs:
+      - dev
+    variables:
+    - $ANDROID_KEYSTORE
 
 test-android-deploy:
   extends: .deploy-android
   dependencies:
     - test-android-build
   rules:
-    - if: $CI_COMMIT_BRANCH == 'dev'
-    - if: $ANDROID_KEYSTORE != null
+    refs:
+      - dev
+    variables:
+      - $ANDROID_KEYSTORE
 
