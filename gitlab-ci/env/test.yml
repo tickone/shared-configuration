@@ -22,7 +22,7 @@ test-android-deploy:
   extends: .deploy-android
   dependencies:
     - test-android-build
-  rules:
+  only:
     refs:
       - dev
     variables:
