@@ -2,9 +2,6 @@ variables:
   BUILD: test
   TAG: latest
 
-include:
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
-
 test-web-build:
   extends: .build
   only:

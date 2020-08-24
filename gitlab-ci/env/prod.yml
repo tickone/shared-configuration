@@ -2,9 +2,6 @@ variables:
   BUILD: prod
   TAG: stable
 
-include:
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
-
 prod-web-build:
   extends: .build
   only:

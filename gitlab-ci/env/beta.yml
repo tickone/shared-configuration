@@ -2,9 +2,6 @@ variables:
   BUILD: beta
   TAG: beta
 
-include:
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
-
 beta-web-build:
   extends: .build
   only:
