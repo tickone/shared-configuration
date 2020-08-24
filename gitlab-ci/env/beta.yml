@@ -1,27 +1,20 @@
 variables:
   BUILD: beta
   TAG: beta
+  BRANCH: master
 
 beta-web-build:
   extends: .build
-  only:
-    - master
 
 beta-web-deploy:
   extends: .deploy
   dependencies:
     - beta-web-build
-  only:
-    - master
 
 beta-android-build:
   extends: .build-android
-  only:
-    - master
 
 beta-android-deploy:
   extends: .deploy-android
   dependencies:
     - beta-android-build
-  only:
-    - master

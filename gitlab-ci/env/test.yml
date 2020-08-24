@@ -1,27 +1,20 @@
 variables:
   BUILD: test
   TAG: latest
+  BRANCH: dev
 
 test-web-build:
   extends: .build
-  only:
-    - dev
 
 test-web-deploy:
   extends: .deploy
   dependencies:
     - test-web-build
-  only:
-    - dev
 
 test-android-build:
   extends: .build-android
-  only:
-    - dev
 
 test-android-deploy:
   extends: .deploy-android
   dependencies:
     - test-android-build
-  only:
-    - dev
