@@ -16,7 +16,7 @@ test-android-build:
     refs:
       - dev
     variables:
-    - $ANDROID_KEYSTORE
+      - $ANDROID_KEYSTORE
 
 test-android-deploy:
   extends: .deploy-android
