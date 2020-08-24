@@ -1,3 +1,15 @@
+.android-rule: &android-rule
+  if: $ANDROID_KEYSTORE != null
+
+.commit-branch: &commit-branch
+  if: $CI_COMMIT_BRANCH == $BANCH
+
+.release-branch: &release-branch
+  if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+$/
+
+.commit-tag: &commit-tag
+  if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+
 .build:
   stage: build
   script:
@@ -34,18 +46,6 @@
 .android:
   variables:
     APP_ENV=android
-
-.android-rule: &android-rule
-  if: $ANDROID_KEYSTORE != null
-
-.commit-branch: &commit-branch
-  if: $CI_COMMIT_BRANCH == $BANCH
-
-.release-branch: &release-branch
-  if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+$/
-
-.commit-tag: &commit-tag
-  if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
 .build-android:
   extends:
