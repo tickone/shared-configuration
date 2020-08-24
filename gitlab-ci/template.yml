@@ -16,7 +16,7 @@
 
 .commit-branch: &commit-branch
   rules:
-    if: $CI_COMMIT_BRANCH == $BANCH
+    - if: $CI_COMMIT_BRANCH == $BANCH
 
 .android: &android
   variables:
