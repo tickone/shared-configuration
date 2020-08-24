@@ -17,7 +17,7 @@
 
 .android: &android
   rules:
-    - when: ! -z $ANDROID_KEYSOTRE
+    - if: ! -z $ANDROID_KEYSOTRE
   variables:
     APP_ENV=android
 
