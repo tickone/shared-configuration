@@ -1,20 +1,26 @@
-variables:
-  BUILD: test
-  TAG: latest
-  BRANCH: dev
-
 test-web-build:
   extends: .build
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'dev'
 
 test-web-deploy:
   extends: .deploy
   dependencies:
     - test-web-build
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'dev'
 
 test-android-build:
   extends: .build-android
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'dev'
+    - if: $ANDROID_KEYSTORE != null
 
 test-android-deploy:
   extends: .deploy-android
   dependencies:
     - test-android-build
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'dev'
+    - if: $ANDROID_KEYSTORE != null
+
