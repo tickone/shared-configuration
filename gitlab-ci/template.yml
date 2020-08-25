@@ -24,7 +24,7 @@
     - .build
   <<: *android
   script:
-    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg ANDROID_ALIAS=${ANDROID_ALIAS} --build-arg ANDROID_STORE_PASSWORD=${ANDROID_STORE_PASSWORD} --build-args ANDROID_KEYSTORE=${ANDROID_KEYSTORE} --build-arg BUILD=${BUILD} --build-arg APP_ENV=android
+    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg ANDROID_ALIAS=${ANDROID_ALIAS} --build-arg ANDROID_STORE_PASSWORD=${ANDROID_STORE_PASSWORD} --build-arg ANDROID_KEYSTORE=${ANDROID_KEYSTORE} --build-arg BUILD=${BUILD} --build-arg APP_ENV=android
     - docker save $DOCKER_IMAGE_REPO:$TAG > image.tar
 
 .deploy-android:
