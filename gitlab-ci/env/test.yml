@@ -1,7 +1,7 @@
 test-web-build:
   extends: .build
   variables:
-    BUILD: dev
+    BUILD: test
     TAG: latest
   only:
     - dev
@@ -18,7 +18,7 @@ test-web-deploy:
 test-android-build:
   extends: .build-android
   variables:
-    BUILD: dev
+    BUILD: test
     TAG: android-latest
     ANDROID_BUILD_APK_NAME: apk
     ANDROID_BUILD_APK_ENV: debug
