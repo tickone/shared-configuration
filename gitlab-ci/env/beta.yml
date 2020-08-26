@@ -1,6 +1,8 @@
 variables:
   BUILD: beta
   TAG: beta
+  ANDROID_BUILD_APK_NAME: apk
+  ANDROID_BUILD_APK_ENV: debug
 
 beta-web-build:
   extends: .build

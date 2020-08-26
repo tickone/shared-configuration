@@ -1,6 +1,8 @@
 variables:
   BUILD: prod
   TAG: stable
+  ANDROID_BUILD_APK_NAME: app
+  ANDROID_BUILD_APK_ENV: release
 
 prod-web-build:
   extends: .build

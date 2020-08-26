@@ -1,5 +1,8 @@
 variables:
   BUILD: dev
+  TAG: latest
+  ANDROID_BUILD_APK_NAME: apk
+  ANDROID_BUILD_APK_ENV: debug
 
 test-web-build:
   extends: .build
