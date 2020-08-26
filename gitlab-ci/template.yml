@@ -43,4 +43,4 @@
     - echo "${GCP_SERVICE_ACCOUNT}" > /root/key.json
     - gcloud auth activate-service-account --key-file=/root/key.json
   script: 
-    - gsutil cp ${ANDROID_APK}-${BUILD} gs://${GOOGLE_CLOUD_BUCKET}/apk-release
+    - gsutil cp ${ANDROID_APK}-${BUILD}.apk gs://${GOOGLE_CLOUD_BUCKET}/apk-release
