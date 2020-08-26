@@ -1,3 +1,6 @@
+variables:
+  BUILD: dev
+
 test-web-build:
   extends: .build
   only:
