@@ -27,9 +27,9 @@
     - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg ANDROID_ALIAS="${ANDROID_ALIAS}" --build-arg ANDROID_STORE_PASSWORD="${ANDROID_STORE_PASSWORD}" --build-arg ANDROID_KEYSTORE="${ANDROID_KEYSTORE}" --build-arg BUILD="${BUILD}" --build-arg APP_ENV="android"
     - docker save $DOCKER_IMAGE_REPO:$TAG > image.tar
     - ID=$(docker create $DOCKER_IMAGE_REPO:$TAG)
-    - docker cp $ID:/app/platforms/android/app/build/outputs/apk/${ANDROID_BUILD_APK_ENV}/${ANDROID_BUILD_APK_NAME}-${ANDROID_BUILD_APK_ENV}.apk .
+    - docker cp $ID:/app/platforms/android/app/build/outputs/apk/${ANDROID_BUILD_APK_ENV}/app-${ANDROID_BUILD_APK_ENV}.apk .
     - docker rm -f $ID
-    - mv ${ANDROID_BUILD_APK_NAME}-${ANDROID_BUILD_APK_ENV}.apk ${ANDROID_APK}-${BUILD}.apk
+    - mv app-${ANDROID_BUILD_APK_ENV}.apk ${ANDROID_APK}-${BUILD}.apk
   artifacts:
     paths:
       - ${ANDROID_APK}-${BUILD}.apk

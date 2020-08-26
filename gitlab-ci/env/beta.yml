@@ -20,7 +20,6 @@ beta-android-build:
   variables:
     BUILD: beta
     TAG: android-beta
-    ANDROID_BUILD_APK_NAME: apk
     ANDROID_BUILD_APK_ENV: debug
   only:
     variables:
@@ -31,7 +30,6 @@ beta-android-build:
 beta-android-deploy:
   extends: .deploy-android
   variables:
-    ANDROID_BUILD_APK_NAME: apk
     ANDROID_BUILD_APK_ENV: debug
   dependencies:
     - beta-android-build
