@@ -6,12 +6,17 @@ variables:
 
 prod-web-build:
   extends: .build
+  variables:
+    BUILD: prod
+    TAG: stable
   only:
     - /^release\/\d+\.\d+$/
     - tags
 
 prod-web-deploy:
   extends: .deploy
+  variables:
+    TAG: stable
   dependencies:
     - prod-web-build
   after_script:
@@ -23,6 +28,11 @@ prod-web-deploy:
 
 prod-android-build:
   extends: .build-android
+  variables:
+    BUILD: prod
+    TAG: android-stable
+    ANDROID_BUILD_APK_NAME: app
+    ANDROID_BUILD_APK_ENV: release
   only:
     refs:
       - /^release\/\d+\.\d+$/
@@ -32,6 +42,9 @@ prod-android-build:
 
 prod-android-deploy:
   extends: .deploy-android
+  variables:
+    ANDROID_BUILD_APK_NAME: app
+    ANDROID_BUILD_APK_ENV: release
   dependencies:
     - prod-android-build
   only:

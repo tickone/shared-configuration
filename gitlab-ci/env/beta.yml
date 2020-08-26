@@ -1,16 +1,15 @@
-variables:
-  BUILD: beta
-  TAG: beta
-  ANDROID_BUILD_APK_NAME: apk
-  ANDROID_BUILD_APK_ENV: debug
-
 beta-web-build:
   extends: .build
+  variables:
+    BUILD: beta
+    TAG: beta
   only:
     - master
 
 beta-web-deploy:
   extends: .deploy
+  variables:
+    TAG: beta
   dependencies:
     - beta-web-build
   only:
@@ -18,6 +17,11 @@ beta-web-deploy:
 
 beta-android-build:
   extends: .build-android
+  variables:
+    BUILD: beta
+    TAG: android-beta
+    ANDROID_BUILD_APK_NAME: apk
+    ANDROID_BUILD_APK_ENV: debug
   only:
     variables:
       - $ANDROID_KEYSTORE
@@ -26,6 +30,9 @@ beta-android-build:
 
 beta-android-deploy:
   extends: .deploy-android
+  variables:
+    ANDROID_BUILD_APK_NAME: apk
+    ANDROID_BUILD_APK_ENV: debug
   dependencies:
     - beta-android-build
   only:
