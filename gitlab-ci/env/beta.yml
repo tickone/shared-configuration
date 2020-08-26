@@ -30,6 +30,7 @@ beta-android-build:
 beta-android-deploy:
   extends: .deploy-android
   variables:
+    BUILD: beta
     ANDROID_BUILD_APK_ENV: debug
   dependencies:
     - beta-android-build

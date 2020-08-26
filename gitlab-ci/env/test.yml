@@ -32,6 +32,7 @@ test-android-deploy:
   dependencies:
     - test-android-build
   variables:
+    BUILD: test
     ANDROID_BUILD_APK_ENV: debug
   only:
     refs:

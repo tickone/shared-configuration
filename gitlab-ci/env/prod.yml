@@ -36,6 +36,7 @@ prod-android-build:
 prod-android-deploy:
   extends: .deploy-android
   variables:
+    BUILD: prod
     ANDROID_BUILD_APK_ENV: release
   dependencies:
     - prod-android-build
