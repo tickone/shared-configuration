@@ -4,7 +4,6 @@ prod-web-build:
     BUILD: prod
     TAG: stable
   only:
-    - /^release\/\d+\.\d+$/
     - tags
 
 prod-web-deploy:
