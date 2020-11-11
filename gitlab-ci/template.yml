@@ -1,6 +1,6 @@
-.android: &android
-  variables:
-    APP_ENV: android
+# .android: &android
+#   variables:
+#     APP_ENV: android
 
 .build:
   stage: build
@@ -19,26 +19,26 @@
   after_script:
     - docker push $DOCKER_IMAGE_REPO:$TAG
 
-.build-android:
-  stage: build
-  <<: *android
-  script:
-    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg ANDROID_ALIAS="${ANDROID_ALIAS}" --build-arg ANDROID_STORE_PASSWORD="${ANDROID_STORE_PASSWORD}" --build-arg ANDROID_KEYSTORE="${ANDROID_KEYSTORE}" --build-arg BUILD="${BUILD}" --build-arg APP_ENV="android"
-    - ID=$(docker create $DOCKER_IMAGE_REPO:$TAG)
-    - docker cp $ID:/app/platforms/android/app/build/outputs/apk/${ANDROID_BUILD_APK_ENV}/app-${ANDROID_BUILD_APK_ENV}.apk .
-    - docker rm -f $ID
-    - mv app-${ANDROID_BUILD_APK_ENV}.apk ${ANDROID_APK}-${BUILD}.apk
-  artifacts:
-    paths:
-      - ${ANDROID_APK}-${BUILD}.apk
-    expire_in: 1 day
+# .build-android:
+#   stage: build
+#   <<: *android
+#   script:
+#     - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg ANDROID_ALIAS="${ANDROID_ALIAS}" --build-arg ANDROID_STORE_PASSWORD="${ANDROID_STORE_PASSWORD}" --build-arg ANDROID_KEYSTORE="${ANDROID_KEYSTORE}" --build-arg BUILD="${BUILD}" --build-arg APP_ENV="android"
+#     - ID=$(docker create $DOCKER_IMAGE_REPO:$TAG)
+#     - docker cp $ID:/app/platforms/android/app/build/outputs/apk/${ANDROID_BUILD_APK_ENV}/app-${ANDROID_BUILD_APK_ENV}.apk .
+#     - docker rm -f $ID
+#     - mv app-${ANDROID_BUILD_APK_ENV}.apk ${ANDROID_APK}-${BUILD}.apk
+#   artifacts:
+#     paths:
+#       - ${ANDROID_APK}-${BUILD}.apk
+#     expire_in: 1 day
 
-.deploy-android:
-  image: google/cloud-sdk
-  <<: *android
-  stage: deploy
-  before_script:
-    - echo "${GCP_SERVICE_ACCOUNT}" > /root/key.json
-    - gcloud auth activate-service-account --key-file=/root/key.json
-  script:
-    - gsutil cp ${ANDROID_APK}-${BUILD}.apk gs://${GOOGLE_CLOUD_BUCKET}/apk-release
+# .deploy-android:
+#   image: google/cloud-sdk
+#   <<: *android
+#   stage: deploy
+#   before_script:
+#     - echo "${GCP_SERVICE_ACCOUNT}" > /root/key.json
+#     - gcloud auth activate-service-account --key-file=/root/key.json
+#   script:
+#     - gsutil cp ${ANDROID_APK}-${BUILD}.apk gs://${GOOGLE_CLOUD_BUCKET}/apk-release
