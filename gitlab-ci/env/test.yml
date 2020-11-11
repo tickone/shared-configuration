@@ -15,28 +15,3 @@ test-web-deploy:
   only:
     - dev
 
-test-android-build:
-  extends: .build-android
-  variables:
-    BUILD: test
-    TAG: android-latest
-    ANDROID_BUILD_APK_ENV: debug
-  only:
-    refs:
-      - dev
-    variables:
-      - $ANDROID_KEYSTORE
-
-test-android-deploy:
-  extends: .deploy-android
-  dependencies:
-    - test-android-build
-  variables:
-    BUILD: test
-    ANDROID_BUILD_APK_ENV: debug
-  only:
-    refs:
-      - dev
-    variables:
-      - $ANDROID_KEYSTORE
-
