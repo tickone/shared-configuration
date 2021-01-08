@@ -1,4 +1,4 @@
-prod-web-build:
+prod2-web-build:
   extends: .build
   variables:
     BUILD: prod-2
@@ -6,7 +6,7 @@ prod-web-build:
   only:
     - stable-2
 
-prod-web-deploy:
+prod2-web-deploy:
   extends: .deploy
   variables:
     TAG: stable
