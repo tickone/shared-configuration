@@ -1,0 +1,16 @@
+test2-web-build:
+  extends: .build
+  variables:
+    BUILD: test-2
+    TAG: latest-2
+  only:
+    - dev2
+
+test2-web-deploy:
+  extends: .deploy
+  variables:
+    TAG: latest-2
+  dependencies:
+    - test2-web-build
+  only:
+    - dev2

@@ -1,0 +1,16 @@
+beta2-web-build:
+  extends: .build
+  variables:
+    BUILD: beta-2
+    TAG: beta-2
+  only:
+    - master2
+
+beta2-web-deploy:
+  extends: .deploy
+  variables:
+    TAG: beta-2
+  dependencies:
+    - beta2-web-build
+  only:
+    - master2
