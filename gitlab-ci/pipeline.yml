@@ -4,6 +4,8 @@ include:
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test2.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta2.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod2.yml
 
 stages:
