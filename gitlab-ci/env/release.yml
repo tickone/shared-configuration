@@ -1,7 +1,7 @@
 release:
   stage: release
   image:
-    name: sentryio/sentry-new-release:0.3.0
+    name: getsentry/sentry-new-release:0.3.0
     entrypoint: ["/bin/sh", "-c"]
   script:
     - |
@@ -17,7 +17,7 @@ release:
 
       export BITBUCKET_COMMIT=$CI_COMMIT_SHA
 
-      sh /usr/bin/pipe.sh
+      if [ $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != '' ]; then
+        sh /usr/bin/pipe.sh
+      fi
   before_script: []
-  rules:
-    - if: $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != ''
