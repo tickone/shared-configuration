@@ -7,8 +7,7 @@ release:
     SENTRY_PROJECT: $SENTRY_PROJECT
   script:
     - sh /usr/bin/pipe.sh
-  only:
-    variables:
-      - $SENTRY_AUTH_TOKEN != ''
-      - $SENTRY_ORG != ''
-      - $SENTRY_PROJECT != ''
+  rules:
+    - if: $SENTRY_AUTH_TOKEN != ''
+    - if: $SENTRY_ORG != ''
+    - if: $SENTRY_PROJECT != ''
