@@ -5,11 +5,11 @@ release:
     entrypoint: ["/bin/sh", "-c"]
   script:
     - |
-      if [ ! -z $CI_COMMIT_TAG ]; then
+      if [[ ! -z $CI_COMMIT_TAG ]]; then
         export RELEASE=production
-      elif [ $CI_COMMIT_BRANCH = "dev" ]; then
+      elif [[ $CI_COMMIT_BRANCH = "dev" ]]; then
         export RELEASE=development
-      elif [ $CI_COMMIT_BRANCH = "master" ]; then
+      elif [[ $CI_COMMIT_BRANCH = "master" ]]; then
         export RELEASE=beta
       else
         export RELEASE=development
@@ -17,7 +17,7 @@ release:
 
       export BITBUCKET_COMMIT=$CI_COMMIT_SHA
 
-      if [ $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != '' ]; then
+      if [[ $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != '' ]]; then
         sh /usr/bin/pipe.sh
       fi
   before_script: []
