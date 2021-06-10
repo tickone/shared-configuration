@@ -2,8 +2,21 @@ release:
   stage: release
   image: sentryio/sentry-new-release:0.3.0
   script:
-    - sh /usr/bin/pipe.sh
-  before_script:
-    - echo "Release"
+    - |
+      if [ ! -z $CI_COMMIT_TAG ]; then
+        export RELEASE=production
+      else if [ $CI_COMMIT_BRANCH == "dev" ]; then
+        export RELEASE=development
+      else if [ $CI_COMMIT_BRANCH == "master" ]; then
+        export RELEASE=beta
+      else
+        export RELEASE=development
+      fi
+
+      export BITBUCKET_COMMIT=$CI_COMMIT_SHA
+
+      sh /usr/bin/pipe.sh
+  before_script: []
+  entrypoint: ["/bin/sh", "-c"]
   rules:
     - if: $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != ''
