@@ -17,7 +17,11 @@ release:
 
       export BITBUCKET_COMMIT=$CI_COMMIT_SHA
 
-      if [[ $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != '' ]]; then
-        sh /usr/bin/pipe.sh
-      fi
+      sh /usr/bin/pipe.sh
   before_script: []
+  only:
+    variables:
+      - $SENTRY_AUTH_TOKEN != null
+      - $SENTRY_ORG != null
+      - $SENTRY_PROJECT != null
+      - $SENTRY_URL != null
