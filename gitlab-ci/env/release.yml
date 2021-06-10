@@ -6,13 +6,13 @@ release:
   script:
     - |
       if [[ ! -z $CI_COMMIT_TAG ]]; then
-        export RELEASE=production
+        export ENVIRONMENT=production
       elif [[ $CI_COMMIT_BRANCH = "dev" ]]; then
-        export RELEASE=development
+        export ENVIRONMENT=development
       elif [[ $CI_COMMIT_BRANCH = "master" ]]; then
-        export RELEASE=beta
+        export ENVIRONMENT=beta
       else
-        export RELEASE=development
+        export ENVIRONMENT=development
       fi
 
       export BITBUCKET_COMMIT=$CI_COMMIT_SHA
