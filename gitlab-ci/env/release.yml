@@ -17,6 +17,6 @@ release:
 
       sh /usr/bin/pipe.sh
   before_script: []
-  entrypoint: ["/bin/sh", "-c"]
+  # entrypoint: ["/bin/sh", "-c"]
   rules:
     - if: $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != ''
