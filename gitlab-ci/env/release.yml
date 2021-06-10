@@ -6,6 +6,4 @@ release:
   before_script:
     - echo "Release"
   rules:
-    - if: $SENTRY_AUTH_TOKEN == ''
-    - if: $SENTRY_ORG == ''
-    - if: $SENTRY_PROJECT == ''
+    - if: $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != ''
