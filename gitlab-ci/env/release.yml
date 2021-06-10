@@ -1,15 +1,11 @@
 release:
   stage: release
   image: sentryio/sentry-new-release:0.3.0
-  variables:
-    SENTRY_AUTH_TOKEN: $SENTRY_AUTH_TOKEN
-    SENTRY_ORG: $SENTRY_ORG
-    SENTRY_PROJECT: $SENTRY_PROJECT
   script:
     - sh /usr/bin/pipe.sh
   before_script:
     - echo "Release"
   rules:
-    - if: $SENTRY_AUTH_TOKEN != ''
-    - if: $SENTRY_ORG != ''
-    - if: $SENTRY_PROJECT != ''
+    - if: $SENTRY_AUTH_TOKEN == ''
+    - if: $SENTRY_ORG == ''
+    - if: $SENTRY_PROJECT == ''
