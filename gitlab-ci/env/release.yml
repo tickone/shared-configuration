@@ -7,9 +7,9 @@ release:
     - |
       if [ ! -z $CI_COMMIT_TAG ]; then
         export RELEASE=production
-      else if [ $CI_COMMIT_BRANCH == "dev" ]; then
+      elif [ $CI_COMMIT_BRANCH = "dev" ]; then
         export RELEASE=development
-      else if [ $CI_COMMIT_BRANCH == "master" ]; then
+      elif [ $CI_COMMIT_BRANCH = "master" ]; then
         export RELEASE=beta
       else
         export RELEASE=development
