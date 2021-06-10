@@ -1,6 +1,8 @@
 release:
   stage: release
-  image: sentryio/sentry-new-release:0.3.0
+  image:
+    name: sentryio/sentry-new-release:0.3.0
+    entrypoint: ["/bin/sh", "-c"]
   script:
     - |
       if [ ! -z $CI_COMMIT_TAG ]; then
@@ -17,6 +19,5 @@ release:
 
       sh /usr/bin/pipe.sh
   before_script: []
-  # entrypoint: ["/bin/sh", "-c"]
   rules:
     - if: $SENTRY_AUTH_TOKEN != '' && $SENTRY_ORG != '' && $SENTRY_PROJECT != ''
