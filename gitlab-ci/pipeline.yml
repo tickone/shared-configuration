@@ -7,7 +7,7 @@ include:
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test2.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta2.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod2.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/release.yml
+  #- https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/release.yml
 
 stages:
   - build
