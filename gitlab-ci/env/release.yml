@@ -25,4 +25,3 @@ release:
       - $SENTRY_ORG != null
       - $SENTRY_PROJECT != null
       - $SENTRY_URL != null
-      - $SENTRY_PROJECT != null
