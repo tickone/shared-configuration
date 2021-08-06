@@ -1,16 +1,44 @@
 include:
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/gcr.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test2.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta2.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod2.yml
-  #- https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/release.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/job.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test2.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta2.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod2.yml
+  # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/release.yml
 
 stages:
   - build
   - test
   - deploy
   - release
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      variables:
+        BUILD: 'test'
+        TAG: 'latest'
+    - if: '$CI_COMMIT_BRANCH == "dev2"'
+      variables:
+        BUILD: 'test-2'
+        TAG: 'latest-2'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      variables:
+        BUILD: 'beta'
+        TAG: 'beta'
+    - if: '$CI_COMMIT_BRANCH == "master2"'
+      variables:
+        BUILD: 'beta-2'
+        TAG: 'beta-2'
+    - if: '$CI_COMMIT_TAG =~ /^v\d\.\d\.\d.*/'
+      variables:
+        BUILD: 'prod'
+        TAG: 'stable'
+    - if: '$CI_COMMIT_BRANCH == "stable-2"'
+      variables:
+        BUILD: prod-2
+        TAG: stable-2
