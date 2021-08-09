@@ -8,11 +8,8 @@ web-deploy:
   needs:
     - web-build
   rules:
-    - if: '$BUILD'
-    - if: '$BUILD == "prod"'
-      when: never
-    - if: '$BUILD == "prod-2"'
-      when: never
+    - if: '$BUILD != "prod"'
+    - if: '$BUILD != "prod-2"'
 
 prod-web-deploy:
   extends: .deploy
