@@ -34,7 +34,7 @@ workflow:
       variables:
         BUILD: 'beta-2'
         TAG: 'beta-2'
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+    - if: '$CI_COMMIT_TAG =~ /^(|v)(?:0|(?:[1-9]\d*))\.(?:0|(?:[1-9]\d*))\.(?:0|(?:[1-9]\d*))(?:-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/'
       variables:
         BUILD: 'prod'
         TAG: 'stable'
