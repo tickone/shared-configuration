@@ -2,6 +2,7 @@ include:
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/gcr.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/job.yml
+  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/regional-job.yml
   # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/test.yml
   # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/beta.yml
   # - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/env/prod.yml
