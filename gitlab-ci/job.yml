@@ -1,5 +1,6 @@
 web-build:
   extends: .build
+  before_script: []
   rules:
     - if: '$BUILD && ($REGIONS == "" || $REGIONS == null)'
 
