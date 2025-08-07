@@ -7,8 +7,13 @@
   script:
     - |
       if [ -n "$REGIONS" ]; then
-        IFS=',' read -ra REGION_ARRAY <<< "$REGIONS"
-        for region in "${REGION_ARRAY[@]}"; do
+        echo "Building for multiple regions: $REGIONS"
+        OLD_IFS="$IFS"
+        IFS=','
+        set -- $REGIONS
+        IFS="$OLD_IFS"
+        for region in "$@"; do
+          region=$(echo "$region" | tr -d ' ')
           echo "Building for region: $region"
           docker build . -t $DOCKER_IMAGE_REPO:$TAG-$region --build-arg GIT_USERNAME="${GIT_USERNAME}" --build-arg GIT_PASSWORD="${GIT_PASSWORD}" --build-arg BUILD="${BUILD}" --build-arg CI_COMMIT_SHA="${CI_COMMIT_SHA}" --build-arg APP_ENV="${APP_ENV}" --build-arg REACT_APP_REGION="$region"
           docker save $DOCKER_IMAGE_REPO:$TAG-$region > image-$region.tar
@@ -27,8 +32,13 @@
   script:
     - |
       if [ -n "$REGIONS" ]; then
-        IFS=',' read -ra REGION_ARRAY <<< "$REGIONS"
-        for region in "${REGION_ARRAY[@]}"; do
+        echo "Deploying for multiple regions: $REGIONS"
+        OLD_IFS="$IFS"
+        IFS=','
+        set -- $REGIONS
+        IFS="$OLD_IFS"
+        for region in "$@"; do
+          region=$(echo "$region" | tr -d ' ')
           echo "Deploying for region: $region"
           docker load < image-$region.tar
           docker push $DOCKER_IMAGE_REPO:$TAG-$region
