@@ -8,9 +8,9 @@ web-deploy:
   extends: .deploy
   needs:
     - web-build
-    - if: '$REGIONS == "" || $REGIONS == null'
   rules:
     - if: '$BUILD != null && $BUILD != "" && $BUILD != "prod" && $BUILD != "prod-2"'
+    - if: '$REGIONS == "" || $REGIONS == null'
 
 prod-web-deploy:
   extends: .deploy
