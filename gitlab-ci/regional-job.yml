@@ -6,6 +6,8 @@
 generate-regional-pipeline:
   stage: .pre
   image: alpine:latest
+  before_script:
+    - echo "Starting regional pipeline generation..."
   script:
     - |
       if [ -z "$REGIONS" ]; then
@@ -13,9 +15,9 @@ generate-regional-pipeline:
         echo "Example: REGIONS='th,sg,my,jp'"
         exit 1
       fi
-      
+
       echo "🚀 Generating pipeline for regions: $REGIONS"
-      
+
       # Create the generated pipeline file
       cat > generated-regional-pipeline.yml << EOF
       # Auto-generated regional pipeline
@@ -26,22 +28,22 @@ generate-regional-pipeline:
         - regional-deploy
 
       EOF
-      
+
       # Convert comma-separated regions to array (Alpine compatible)
       OLD_IFS="$IFS"
       IFS=','
       set -- $REGIONS
       IFS="$OLD_IFS"
-      
+
       job_count=0
-      
+
       for region in "$@"; do
         # Remove whitespace
         region=$(echo "$region" | tr -d ' ')
-        
+
         if [ -n "$region" ]; then
           job_count=$((job_count + 2))
-          
+
           # Generate build job
           cat >> generated-regional-pipeline.yml << EOF
       ${region}-web-build:
@@ -82,10 +84,10 @@ generate-regional-pipeline:
       EOF
         fi
       done
-      
+
       echo "✅ Generated $job_count jobs for regions: $REGIONS"
       echo "📄 Pipeline written to: generated-regional-pipeline.yml"
-      
+
       # Show the generated content for debugging
       echo "📋 Generated pipeline preview:"
       head -20 generated-regional-pipeline.yml
@@ -101,6 +103,9 @@ trigger-regional-jobs:
   stage: .pre
   needs:
     - generate-regional-pipeline
+  image: alpine:latest
+  before_script:
+    - echo "Triggering regional jobs pipeline..."
   trigger:
     include:
       - artifact: generated-regional-pipeline.yml
