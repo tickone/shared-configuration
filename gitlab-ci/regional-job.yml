@@ -49,7 +49,13 @@ generate-regional-pipeline:
           cat >> generated-regional-pipeline.yml << EOF
       ${region}-web-build:
         stage: regional-build
-        extends: .build
+        image: docker:stable
+        services:
+          - docker:stable-dind
+        before_script:
+          - echo \$GCP_SERVICE_ACCOUNT > /root/key.json
+          - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
+          - rm -rf /root/key.json
         variables:
           REGION_NAME: "$region"
         script:
@@ -65,7 +71,13 @@ generate-regional-pipeline:
 
       ${region}-web-deploy:
         stage: regional-deploy
-        extends: .deploy
+        image: docker:stable
+        services:
+          - docker:stable-dind
+        before_script:
+          - echo \$GCP_SERVICE_ACCOUNT > /root/key.json
+          - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
+          - rm -rf /root/key.json
         variables:
           REGION_NAME: "$region"
         script:
