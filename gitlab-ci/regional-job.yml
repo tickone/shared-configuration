@@ -1,68 +1,113 @@
-# Regional deployment jobs for different regions
-# This file handles region-specific builds and deployments
-# Use REGIONS variable with comma-separated values like "th,sg,my,jp,kr" or any custom region codes
+# Dynamic Regional Jobs using GitLab Child Pipelines (Shell Version)
+# This approach generates region-specific jobs dynamically based on REGIONS variable
+# Uses pure shell script - no Node.js dependencies
 
-.regional-build:
-  extends: .build
+stages:
+  - generate
+
+# Job to generate dynamic pipeline configuration using shell
+generate-regional-pipeline:
+  stage: generate
+  image: alpine:latest
   script:
     - |
-      if [ -n "$REGIONS" ]; then
-        echo "Building for multiple regions: $REGIONS"
-        OLD_IFS="$IFS"
-        IFS=','
-        set -- $REGIONS
-        IFS="$OLD_IFS"
-        for region in "$@"; do
-          region=$(echo "$region" | tr -d ' ')
-          echo "Building for region: $region"
-          docker build . -t $DOCKER_IMAGE_REPO:$TAG-$region --build-arg GIT_USERNAME="${GIT_USERNAME}" --build-arg GIT_PASSWORD="${GIT_PASSWORD}" --build-arg BUILD="${BUILD}" --build-arg CI_COMMIT_SHA="${CI_COMMIT_SHA}" --build-arg APP_ENV="${APP_ENV}" --build-arg REACT_APP_REGION="$region"
-          docker save $DOCKER_IMAGE_REPO:$TAG-$region > image-$region.tar
-        done
-      elif [ -n "$REGION" ]; then
-        echo "Building for single region: $REGION"
-        docker build . -t $DOCKER_IMAGE_REPO:$TAG-$REGION --build-arg GIT_USERNAME="${GIT_USERNAME}" --build-arg GIT_PASSWORD="${GIT_PASSWORD}" --build-arg BUILD="${BUILD}" --build-arg CI_COMMIT_SHA="${CI_COMMIT_SHA}" --build-arg APP_ENV="${APP_ENV}" --build-arg REACT_APP_REGION="$REGION"
-        docker save $DOCKER_IMAGE_REPO:$TAG-$REGION > image-$REGION.tar
+      if [ -z "$REGIONS" ]; then
+        echo "Error: No REGIONS environment variable found"
+        echo "Example: REGIONS='th,sg,my,jp'"
+        exit 1
       fi
+      
+      echo "🚀 Generating pipeline for regions: $REGIONS"
+      
+      # Create the generated pipeline file
+      cat > generated-regional-pipeline.yml << EOF
+      # Auto-generated regional pipeline
+      # Generated for regions: $REGIONS
+
+      stages:
+        - regional-build
+        - regional-deploy
+
+      EOF
+      
+      # Convert comma-separated regions to array (Alpine compatible)
+      OLD_IFS="$IFS"
+      IFS=','
+      set -- $REGIONS
+      IFS="$OLD_IFS"
+      
+      job_count=0
+      
+      for region in "$@"; do
+        # Remove whitespace
+        region=$(echo "$region" | tr -d ' ')
+        
+        if [ -n "$region" ]; then
+          job_count=$((job_count + 2))
+          
+          # Generate build job
+          cat >> generated-regional-pipeline.yml << EOF
+      ${region}-web-build:
+        stage: regional-build
+        extends: .build
+        variables:
+          REGION_NAME: "$region"
+        script:
+          - echo "Building for region: $region"
+          - docker build . -t \$DOCKER_IMAGE_REPO:\$TAG-$region --build-arg GIT_USERNAME="\$GIT_USERNAME" --build-arg GIT_PASSWORD="\$GIT_PASSWORD" --build-arg BUILD="\$BUILD" --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" --build-arg APP_ENV="\$APP_ENV" --build-arg REACT_APP_REGION="$region"
+          - docker save \$DOCKER_IMAGE_REPO:\$TAG-$region > image-$region.tar
+        artifacts:
+          paths:
+            - image-$region.tar
+          expire_in: 1 hour
+        rules:
+          - if: '\$BUILD'
+
+      ${region}-web-deploy:
+        stage: regional-deploy
+        extends: .deploy
+        variables:
+          REGION_NAME: "$region"
+        script:
+          - echo "Deploying for region: $region"
+          - docker load < image-$region.tar
+          - docker push \$DOCKER_IMAGE_REPO:\$TAG-$region
+          - |
+            if [ -n "\$CI_COMMIT_TAG" ]; then
+              docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG-$region
+              docker push \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG-$region
+            fi
+        needs:
+          - ${region}-web-build
+        rules:
+          - if: '\$BUILD != null && \$BUILD != ""'
+
+      EOF
+        fi
+      done
+      
+      echo "✅ Generated $job_count jobs for regions: $REGIONS"
+      echo "📄 Pipeline written to: generated-regional-pipeline.yml"
+      
+      # Show the generated content for debugging
+      echo "📋 Generated pipeline preview:"
+      head -20 generated-regional-pipeline.yml
+  artifacts:
+    paths:
+      - generated-regional-pipeline.yml
+    expire_in: 1 hour
   rules:
     - if: '$REGIONS && $BUILD'
-    - if: '$REGION && $BUILD'
 
-.regional-deploy:
-  extends: .deploy
-  script:
-    - |
-      if [ -n "$REGIONS" ]; then
-        echo "Deploying for multiple regions: $REGIONS"
-        OLD_IFS="$IFS"
-        IFS=','
-        set -- $REGIONS
-        IFS="$OLD_IFS"
-        for region in "$@"; do
-          region=$(echo "$region" | tr -d ' ')
-          echo "Deploying for region: $region"
-          docker load < image-$region.tar
-          docker push $DOCKER_IMAGE_REPO:$TAG-$region
-          if [ -n "$CI_COMMIT_TAG" ]; then
-            docker tag $DOCKER_IMAGE_REPO:$TAG-$region $DOCKER_IMAGE_REPO:$CI_COMMIT_TAG-$region
-            docker push $DOCKER_IMAGE_REPO:$CI_COMMIT_TAG-$region
-          fi
-        done
-      elif [ -n "$REGION" ]; then
-        echo "Deploying for single region: $REGION"
-        docker load < image-$REGION.tar
-        docker push $DOCKER_IMAGE_REPO:$TAG-$REGION
-        if [ -n "$CI_COMMIT_TAG" ]; then
-          docker tag $DOCKER_IMAGE_REPO:$TAG-$REGION $DOCKER_IMAGE_REPO:$CI_COMMIT_TAG-$REGION
-          docker push $DOCKER_IMAGE_REPO:$CI_COMMIT_TAG-$REGION
-        fi
-      fi
-
-# Dynamic regional build job
-regional-web-build:
-  extends: .regional-build
-
-# Dynamic regional deploy job
-regional-web-deploy:
-  extends: .regional-deploy
+# Trigger the dynamically generated regional pipeline
+trigger-regional-jobs:
+  stage: generate
   needs:
-    - regional-web-build
+    - generate-regional-pipeline
+  trigger:
+    include:
+      - artifact: generated-regional-pipeline.yml
+        job: generate-regional-pipeline
+    strategy: depend
+  rules:
+    - if: '$REGIONS && $BUILD'
