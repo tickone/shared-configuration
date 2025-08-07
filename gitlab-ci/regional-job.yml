@@ -104,10 +104,6 @@ trigger-regional-jobs:
   stage: .pre
   needs:
     - generate-regional-pipeline
-  image: alpine:latest
-  services: []
-  before_script:
-    - echo "Triggering regional jobs pipeline..."
   trigger:
     include:
       - artifact: generated-regional-pipeline.yml
