@@ -4,7 +4,7 @@
 
 # Job to generate dynamic pipeline configuration using shell
 generate-regional-pipeline:
-  stage: .pre
+  stage: pre
   image: alpine:latest
   services: []
   before_script:
@@ -115,7 +115,7 @@ generate-regional-pipeline:
 
 # Trigger the dynamically generated regional pipeline
 trigger-regional-jobs:
-  stage: .pre
+  stage: pre
   needs:
     - generate-regional-pipeline
   trigger:

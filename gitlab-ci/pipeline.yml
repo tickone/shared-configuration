@@ -5,7 +5,7 @@ include:
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/regional-job.yml
 
 stages:
-  - .pre
+  - pre
   - build
   - test
   - deploy
