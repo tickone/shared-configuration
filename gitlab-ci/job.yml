@@ -1,21 +1,21 @@
 web-build:
   extends: .build
   rules:
-    - if: '$BUILD && ($REGIONS == "" || $REGIONS == null)'
+    - if: '$BUILD'
 
 web-deploy:
   extends: .deploy
   needs:
     - web-build
   rules:
-    - if: '$BUILD != null && $BUILD != "" && $BUILD != "prod" && $BUILD != "prod-2" && ($REGIONS == "" || $REGIONS == null)'
+    - if: '$BUILD != null && $BUILD != "" && $BUILD != "prod" && $BUILD != "prod-2"'
 
 prod-web-deploy:
   extends: .deploy
   needs:
     - web-build
   rules:
-    - if: '($BUILD == "prod" || $BUILD == "prod-2") && ($REGIONS == "" || $REGIONS == null)'
+    - if: '($BUILD == "prod" || $BUILD == "prod-2")'
   after_script:
     - docker push $DOCKER_IMAGE_REPO:$TAG
     - docker tag $DOCKER_IMAGE_REPO:$TAG $DOCKER_IMAGE_REPO:$CI_COMMIT_TAG
