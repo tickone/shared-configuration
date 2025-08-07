@@ -2,12 +2,9 @@
 # This approach generates region-specific jobs dynamically based on REGIONS variable
 # Uses pure shell script - no Node.js dependencies
 
-stages:
-  - generate
-
 # Job to generate dynamic pipeline configuration using shell
 generate-regional-pipeline:
-  stage: generate
+  stage: .pre
   image: alpine:latest
   script:
     - |
@@ -101,7 +98,7 @@ generate-regional-pipeline:
 
 # Trigger the dynamically generated regional pipeline
 trigger-regional-jobs:
-  stage: generate
+  stage: .pre
   needs:
     - generate-regional-pipeline
   trigger:
