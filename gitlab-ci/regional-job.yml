@@ -18,8 +18,10 @@ generate-regional-pipeline:
       fi
 
       # Ensure 'hk' is present in REGIONS
-      if ! echo ",$REGIONS," | grep -q ",hk,"; then
-        REGIONS="$REGIONS,hk"
+      if [ "$DEV_PIPELINE" != "true" ]; then
+        if ! echo ",$REGIONS," | grep -q ",hk,"; then
+          REGIONS="$REGIONS,hk"
+        fi
       fi
 
       echo "🚀 Generating pipeline for regions: $REGIONS"

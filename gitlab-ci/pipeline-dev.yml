@@ -13,6 +13,7 @@ stages:
 
 variables:
   BUILD: prod
+  DEV_PIPELINE: true
 
 workflow:
   rules:
