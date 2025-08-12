@@ -67,7 +67,7 @@ generate-regional-pipeline:
           REGION_NAME: "$region"
         script:
           - echo "Building for region $region"
-          - docker build . -t \$DOCKER_IMAGE_REPO:\$TAG-$region --build-arg GIT_USERNAME="\$GIT_USERNAME" --build-arg GIT_PASSWORD="\$GIT_PASSWORD" --build-arg BUILD="\$BUILD" --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" --build-arg APP_ENV="\$APP_ENV" --build-arg REACT_APP_REGION="$region"
+          - docker build . -t \$DOCKER_IMAGE_REPO:\$TAG-$region --build-arg GIT_USERNAME="\$GIT_USERNAME" --build-arg GIT_PASSWORD="\$GIT_PASSWORD" --build-arg BUILD="\$BUILD" --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" --build-arg APP_ENV="\$APP_ENV" --build-arg REACT_APP_REGION="$region" --build-arg REGION="$region"
           - docker save \$DOCKER_IMAGE_REPO:\$TAG-$region > image-$region.tar
         artifacts:
           paths:
