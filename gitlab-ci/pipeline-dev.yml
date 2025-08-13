@@ -1,8 +1,11 @@
 include:
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/gcr.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/template.yml
-  - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/job.yml
   - https://raw.githubusercontent.com/tickone/shared-configuration/master/gitlab-ci/regional-job.yml
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
 
 stages:
   - pre
@@ -13,25 +16,5 @@ stages:
 
 variables:
   BUILD: prod
+  TAG: stable
   DEV_PIPELINE: true
-
-workflow:
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
-      variables:
-        TAG: 'latest'
-    - if: '$CI_COMMIT_BRANCH == "dev2"'
-      variables:
-        TAG: 'latest-2'
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      variables:
-        TAG: 'beta'
-    - if: '$CI_COMMIT_BRANCH == "master2"'
-      variables:
-        TAG: 'beta-2'
-    - if: '$CI_COMMIT_TAG =~ /^(|v)(?:0|(?:[1-9]\d*))\.(?:0|(?:[1-9]\d*))\.(?:0|(?:[1-9]\d*))(?:-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/'
-      variables:
-        TAG: 'stable'
-    - if: '$CI_COMMIT_BRANCH == "stable-2"'
-      variables:
-        TAG: stable-2
