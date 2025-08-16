@@ -151,7 +151,8 @@ update-rollout-digests:
     git config user.name  "gitlab-ci"
     git config user.email "gitlab-ci@dimorder.com"
 
-    set -eu
+    echo "Checking out branch: $CI_COMMIT_REF_NAME"
+    git checkout -B "$CI_COMMIT_REF_NAME"
 
     # === 尋找 manifest 檔 ===
     pick_manifest() {
