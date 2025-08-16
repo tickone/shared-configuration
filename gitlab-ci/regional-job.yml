@@ -138,7 +138,7 @@ update-rollout-digests:
     # 兩種其一即可：A 用 credential file；B 直接改 remote
     # A) 正確寫入 git-credentials（無前導空白、單行）
     git config --global credential.helper store
-    printf "https://oauth2:%s@gitlab.com\n" "$ARGOCD_GITTOKEN" > ~/.git-credentials
+    printf "https://oauth2:%s@gitlab.com\n" "$GIT_PAT" > ~/.git-credentials
 
     # --- 尋找 manifest ---
     pick_manifest() {
