@@ -148,6 +148,7 @@ update-rollout-digests:
     apk add --no-cache git curl skopeo findutils
     curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
     chmod +x /usr/local/bin/yq
+    git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@${CI_REPOSITORY_URL}
     git config user.name  "gitlab-ci"
     git config user.email "gitlab-ci@dimorder.com"
 
