@@ -59,7 +59,10 @@ generate-regional-pipeline:
         image: docker:stable
         services:
           - docker:stable-dind
-        before_script: []
+        before_script:
+          - echo \$GCP_SERVICE_ACCOUNT > /root/key.json
+          - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
+          - rm -rf /root/key.json
         variables:
           REGION_NAME: "$region"
         script:
@@ -149,7 +152,6 @@ update-rollout-digests:
     apk add --no-cache git curl skopeo findutils
     curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
     chmod +x /usr/local/bin/yq
-    repo_no_scheme="$(printf '%s' "$CI_REPOSITORY_URL" | sed -E 's#^https?://##')"
 
     git config --global credential.helper store
     cat > ~/.git-credentials <<EOF
