@@ -144,12 +144,12 @@ update-rollout-digests:
   variables:
     GIT_DEPTH: "0"
   script: |
-    - set -eu
-    - apk add --no-cache git curl skopeo findutils
-    - curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
-    - chmod +x /usr/local/bin/yq
-    - git config user.name  "gitlab-ci"
-    - git config user.email "gitlab-ci@dimorder.com"
+    set -eu
+    apk add --no-cache git curl skopeo findutils
+    curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
+    chmod +x /usr/local/bin/yq
+    git config user.name  "gitlab-ci"
+    git config user.email "gitlab-ci@dimorder.com"
 
     set -eu
 
