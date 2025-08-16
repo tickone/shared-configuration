@@ -203,8 +203,8 @@ update-rollout-digests:
 
     # === 逐一處理 regions ===
     changed=0
-    IFS=',' read -r -a regions <<< "$REGIONS"
-    for raw in "${regions[@]}"; do
+    IFS=','
+    for raw in $REGIONS; do
       # 去除空白
       region="$(echo "$raw" | xargs)"
       [ -n "$region" ] || continue
@@ -212,7 +212,6 @@ update-rollout-digests:
       image_ref="${DOCKER_IMAGE_REPO}:${TAG}-${region}"
       echo "Resolving digest for: ${image_ref}"
 
-      # 取得 digest（僅 sha256 值）
       digest="$(skopeo inspect "${SKOPEO_CREDS[@]}" --format '{{.Digest}}' "docker://${image_ref}")"
       if [ -z "$digest" ]; then
         echo "ERROR: cannot resolve digest for ${image_ref}" >&2
@@ -220,10 +219,10 @@ update-rollout-digests:
       fi
       echo "  -> digest: ${digest}"
 
-      # 寫入 buildImages.[region] = "${DOCKER_IMAGE_REPO}@${digest}"
-      yq -i "select(.kind == "SimpleSite") .spec.buildImages.${region} = \"${DOCKER_IMAGE_REPO}@${digest}\"" "$MANIFEST"
+      yq -i 'select(.kind == "SimpleSite") .spec.buildImages.'"${region}"' = "'"${DOCKER_IMAGE_REPO}@${digest}"'"' "$MANIFEST"
       changed=1
     done
+
 
     # === 更新 ArgoCD repoURL ===
     yq -i "select(.kind == "SimpleSite") .spec.argocd.repoURL = \"$CI_REPOSITORY_URL\"" "$MANIFEST"
