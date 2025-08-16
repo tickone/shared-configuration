@@ -64,7 +64,8 @@ generate-regional-pipeline:
           REGION_NAME: "$region"
         script:
           - echo "Building for region $region"
-          - docker build . -t \$DOCKER_IMAGE_REPO:\$TAG-$region --build-arg GIT_USERNAME="\$GIT_USERNAME" --build-arg GIT_PASSWORD="\$GIT_PASSWORD" --build-arg BUILD="\$BUILD" --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" --build-arg APP_ENV="\$APP_ENV" --build-arg REACT_APP_REGION="$region" --build-arg REGION="$region"
+          - docker pull \$DOCKER_IMAGE_REPO:\$TAG-$region || true
+          - docker build --cache-from \$DOCKER_IMAGE_REPO:\$TAG-$region . -t \$DOCKER_IMAGE_REPO:\$TAG-$region --build-arg GIT_USERNAME="\$GIT_USERNAME" --build-arg GIT_PASSWORD="\$GIT_PASSWORD" --build-arg BUILD="\$BUILD" --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" --build-arg APP_ENV="\$APP_ENV" --build-arg REACT_APP_REGION="$region" --build-arg REGION="$region"
           - docker save \$DOCKER_IMAGE_REPO:\$TAG-$region > image-$region.tar
         artifacts:
           paths:
@@ -149,7 +150,11 @@ update-rollout-digests:
     curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
     chmod +x /usr/local/bin/yq
     repo_no_scheme="$(printf '%s' "$CI_REPOSITORY_URL" | sed -E 's#^https?://##')"
-    git remote set-url origin "https://${GIT_USERNAME}:${GIT_PASSWORD}@${repo_no_scheme}"
+
+    git config --global credential.helper store
+    cat > ~/.git-credentials <<EOF
+      https://${GIT_USERNAME}:${GIT_PASSWORD}@gitlab.com
+    EOF
 
     git config user.name  "gitlab-ci"
     git config user.email "gitlab-ci@dimorder.com"
