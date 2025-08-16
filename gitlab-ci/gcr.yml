@@ -1,6 +1,6 @@
-image: docker:stable
+image: docker:28.3.3-alpine3.22
 services:
-  - docker:stable-dind
+  - docker:28.3.2-dind-alpine3.22
 
 before_script:
   - echo $GCP_SERVICE_ACCOUNT > /root/key.json

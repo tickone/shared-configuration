@@ -141,17 +141,16 @@ trigger-regional-jobs:
 update-rollout-digests:
   stage: pre
   needs: [trigger-regional-jobs]
-  image: alpine:3.20
   variables:
     GIT_DEPTH: "0"
-  before_script:
+  script: |
     - set -eu
     - apk add --no-cache git curl skopeo findutils
     - curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
     - chmod +x /usr/local/bin/yq
     - git config user.name  "gitlab-ci"
     - git config user.email "gitlab-ci@dimorder.com"
-  script: |
+
     set -eu
 
     # === 尋找 manifest 檔 ===
@@ -219,7 +218,7 @@ update-rollout-digests:
 
     if [ "$changed" -eq 1 ]; then
       git add "$MANIFEST"
-      git commit -m "chore(ci): bump version"
+      git commit -m "chore(ci): bump version [skip ci]"
       git push origin "$CI_COMMIT_REF_NAME"
       echo "Updated and pushed ${MANIFEST}"
     else
