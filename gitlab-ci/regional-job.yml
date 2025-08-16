@@ -187,7 +187,7 @@ update-rollout-digests:
     done
 
     # --- ArgoCD repoURL & rapid ---
-    yq -i 'select(.kind == "SimpleSite") .spec.argocd.repoURL = strenv(CI_REPOSITORY_URL)' "$MANIFEST"
+    yq -i 'select(.kind == "SimpleSite") .spec.argocd.repoURL = strenv(CI_PROJECT_URL)' "$MANIFEST"
     if [ -z "${CI_COMMIT_TAG:-}" ]; then
       yq -i 'select(.kind == "SimpleSite") .spec.argocd.rapid = true' "$MANIFEST"
     else
