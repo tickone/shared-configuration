@@ -140,49 +140,28 @@ trigger-regional-jobs:
 
 update-rollout-digests:
   stage: pre
-  needs:
-    - trigger-regional-jobs
+  needs: [trigger-regional-jobs]
   image: alpine:3.20
   variables:
-    GIT_DEPTH: "0"      # 需要完整歷史才能 push
+    GIT_DEPTH: "0"
   before_script:
-    - set -euo pipefail
-    - apk add --no-cache bash git curl skopeo findutils
-
-    # 安裝 yq (mikefarah 版)
+    - set -eu
+    - apk add --no-cache git curl skopeo findutils
     - curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
     - chmod +x /usr/local/bin/yq
-
-    # Git 身分（可改成你的 bot 帳號）
     - git config user.name  "gitlab-ci"
     - git config user.email "gitlab-ci@dimorder.com"
   script: |
-    set -euo pipefail
+    set -eu
 
     # === 尋找 manifest 檔 ===
     pick_manifest() {
-      # 1) 根目錄優先的常見檔名
-      for f in \
-        "deployment.yaml" "deployment.yml" \
-        "deploy.yaml" "deploy.yml"
-      do
-        if [ -f "$f" ]; then
-          echo "$f"
-          return 0
-        fi
+      for f in deployment.yaml deployment.yml deploy.yaml deploy.yml; do
+        [ -f "$f" ] && { echo "$f"; return; }
       done
-
-      # 2) 根目錄的 deploy 通配 (deploy*.yaml / deploy*.yml)
       root_glob="$(ls -1 deploy*.ya?ml 2>/dev/null | head -n1 || true)"
-      if [ -n "$root_glob" ]; then
-        echo "$root_glob"
-        return 0
-      fi
-
-      # 3) 找第一層子目錄，不遞迴更深
-      found="$(find . -maxdepth 2 -mindepth 2 -type f \
-                  \( -name 'deployment.ya?ml' -o -name 'deploy*.ya?ml' \) \
-                  | head -n1 || true)"
+      [ -n "$root_glob" ] && { echo "$root_glob"; return; }
+      found="$(find . -maxdepth 2 -mindepth 2 -type f \( -name 'deployment.ya?ml' -o -name 'deploy*.ya?ml' \) | head -n1 || true)"
       if [ -n "$found" ]; then
         echo "$found"
       else
@@ -195,49 +174,52 @@ update-rollout-digests:
     echo "Using manifest: $MANIFEST"
 
     # Ensure 'hk' is present in REGIONS
-    if [ "$DEV_PIPELINE" != "true" ]; then
-      if ! echo ",$REGIONS," | grep -q ",hk,"; then
-        REGIONS="$REGIONS,hk"
-      fi
+    if [ "${DEV_PIPELINE:-}" != "true" ]; then
+      case ",${REGIONS}," in
+        *",hk,"*) : ;;
+        *) REGIONS="${REGIONS},hk" ;;
+      esac
     fi
 
-    # === 逐一處理 regions ===
     changed=0
     IFS=','
+
+    # 若需要 skopeo 認證，把旗標寫進 SKOPEO_ARGS（避免 bash 陣列）
+    SKOPEO_ARGS="${SKOPEO_CREDS:-}"
+
     for raw in $REGIONS; do
-      # 去除空白
       region="$(echo "$raw" | xargs)"
       [ -n "$region" ] || continue
 
       image_ref="${DOCKER_IMAGE_REPO}:${TAG}-${region}"
       echo "Resolving digest for: ${image_ref}"
 
-      digest="$(skopeo inspect "${SKOPEO_CREDS[@]}" --format '{{.Digest}}' "docker://${image_ref}")"
+      # 注意：ash 不支援 ${arr[@]}；這裡直接展開字串旗標
+      digest="$(skopeo inspect ${SKOPEO_ARGS} --format '{{.Digest}}' "docker://${image_ref}")"
       if [ -z "$digest" ]; then
         echo "ERROR: cannot resolve digest for ${image_ref}" >&2
         exit 1
       fi
       echo "  -> digest: ${digest}"
 
+      # 設定 buildImages.[region]
       yq -i 'select(.kind == "SimpleSite") .spec.buildImages.'"${region}"' = "'"${DOCKER_IMAGE_REPO}@${digest}"'"' "$MANIFEST"
       changed=1
     done
 
+    # === 更新 ArgoCD repoURL（用 strenv 取 env，避免雙引號混亂） ===
+    yq -i 'select(.kind == "SimpleSite") .spec.argocd.repoURL = strenv(CI_REPOSITORY_URL)' "$MANIFEST"
 
-    # === 更新 ArgoCD repoURL ===
-    yq -i "select(.kind == "SimpleSite") .spec.argocd.repoURL = \"$CI_REPOSITORY_URL\"" "$MANIFEST"
-
-    if [ -z "$CI_COMMIT_TAG" ]; then
-      yq -i "select(.kind == "SimpleSite") .spec.argocd.rapid = true" "$MANIFEST"
+    # === rapid 布林值 ===
+    if [ -z "${CI_COMMIT_TAG:-}" ]; then
+      yq -i 'select(.kind == "SimpleSite") .spec.argocd.rapid = true' "$MANIFEST"
     else
-      yq -i "select(.kind == "SimpleSite") .spec.argocd.rapid = false" "$MANIFEST"
+      yq -i 'select(.kind == "SimpleSite") .spec.argocd.rapid = false' "$MANIFEST"
     fi
 
-    # === 若有改動則 commit + push ===
     if [ "$changed" -eq 1 ]; then
       git add "$MANIFEST"
       git commit -m "chore(ci): bump version"
-      # 推回目前分支
       git push origin "$CI_COMMIT_REF_NAME"
       echo "Updated and pushed ${MANIFEST}"
     else
