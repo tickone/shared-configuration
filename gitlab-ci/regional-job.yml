@@ -182,7 +182,7 @@ update-rollout-digests:
       [ -n "$digest" ] || { echo "ERROR: cannot resolve digest for ${image_ref}" >&2; exit 1; }
       echo "  -> digest: ${digest}"
 
-      yq -i 'select(.kind == "SimpleSite") .spec.buildImages.'"${region}"' = "'"${DOCKER_IMAGE_REPO}@${digest}"'"' "$MANIFEST"
+      yq -i 'select(.kind == "SimpleSite") .spec.buildImages.'"${region}"' = "'"${digest}"'"' "$MANIFEST"
       changed=1
     done
 
