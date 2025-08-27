@@ -71,6 +71,8 @@ generate-regional-pipeline:
 
           - echo "Deploying for region $region"
           - docker push \$DOCKER_IMAGE_REPO:\$TAG-$region
+          - docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region
+          - docker push \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region
           - |
             if [ -n "\$CI_COMMIT_TAG" ]; then
               docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG-$region
@@ -81,10 +83,6 @@ generate-regional-pipeline:
               echo "Hong Kong region detected, pushing image without suffix"
               docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$TAG
               docker push \$DOCKER_IMAGE_REPO:\$TAG
-              if [ -n "\$CI_COMMIT_TAG" ]; then
-                docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG
-                docker push \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG
-              fi
             fi
         rules:
           - if: '\$BUILD'
@@ -175,7 +173,7 @@ trigger-regional-jobs:
       region="$(echo "$raw" | xargs)"
       [ -n "$region" ] || continue
 
-      image_ref="${DOCKER_IMAGE_REPO}:${TAG}-${region}"
+      image_ref="${DOCKER_IMAGE_REPO}:${CI_COMMIT_SHA}-${region}"
       echo "Resolving digest for: ${image_ref}"
       digest="$(skopeo inspect ${SKOPEO_ARGS} --format '{{.Digest}}' "docker://${image_ref}")"
       [ -n "$digest" ] || { echo "ERROR: cannot resolve digest for ${image_ref}" >&2; exit 1; }
