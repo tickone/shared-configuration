@@ -181,23 +181,34 @@ trigger-regional-jobs:
       [ -n "$digest" ] || { echo "ERROR: cannot resolve digest for ${image_ref}" >&2; exit 1; }
       echo "  -> digest: ${digest}"
 
+      yq -i '
+        select(.kind == "SimpleSite")
+        | .spec.buildImages |= with_entries(select(.key != "" and .value != ""))
+      ' "$MANIFEST"
+
+
       # names: 從 HOLD_SITES 變數轉成陣列（去前後空白）
       # selector:
       #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite
       #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite
+      # 在 for 迴圈內，拿到 $region 與 $digest 後：
+      REGION="$region" DIGEST="$digest" MODE="$MODE" HOLD_SITES="${HOLD_SITES:-}" \
       yq -i '
-        # HOLD_SITES 可能未設：用 strenv 取得字串；空字串 -> []
+        # HOLD_SITES 可能未設：空字串 -> []
         (strenv(HOLD_SITES) | select(. != "") | split(",") | map(sub("^\\s+|\\s+$"; ""))) // [] as $names
         | (.metadata.name) as $n
         | select(
             .kind == "SimpleSite" and
             (
-              (env(MODE) == "held"     and ($names | any_c(. == $n))) or
-              (env(MODE) != "held"     and ($names | all_c(. != $n)))
+              (strenv(MODE) == "held" and ($names | index($n)) != null) or
+              (strenv(MODE) != "held" and ($names | index($n)) == null)
             )
           )
-        | .spec.buildImages[strenv(region)] = strenv(digest)
+        # 只有 REGION 和 DIGEST 都不是空字串才更新
+        | select(strenv(REGION) != "" and strenv(DIGEST) != "")
+        | .spec.buildImages[strenv(REGION)] = strenv(DIGEST)
       ' "$MANIFEST"
+
 
 
       changed=1
