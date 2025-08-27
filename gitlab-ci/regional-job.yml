@@ -63,6 +63,7 @@ generate-regional-pipeline:
           REGION_NAME: "$region"
           DOCKER_BUILDKIT: "1"
         before_script:
+          - unset DOCKER_AUTH_CONFIG
           - apk add --update docker-cli-buildx
           - docker version && docker buildx version || true
           - docker buildx create --use --name gcrbuilder --driver docker-container || docker buildx use gcrbuilder
