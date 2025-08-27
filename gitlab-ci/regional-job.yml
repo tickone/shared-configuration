@@ -66,17 +66,23 @@ generate-regional-pipeline:
           - echo \$GCP_SERVICE_ACCOUNT > /root/key.json
           - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
           - rm -rf /root/key.json
+          - docker version && docker buildx version || true
+          - docker buildx create --use || docker buildx use default
         script:
           - echo "Building for region $region"
-          - docker pull \$DOCKER_IMAGE_REPO:\$TAG-$region || true
-          - docker pull \$DOCKER_IMAGE_REPO:buildcache || true
+
+          # buildx：使用 registry cache + inline cache，一次推兩個 tag
           - |
-            docker build \
+            docker buildx build \
               --pull \
+              --push \
+              --platform linux/amd64 \
               --build-arg BUILDKIT_INLINE_CACHE=1 \
-              --cache-from \$DOCKER_IMAGE_REPO:\$TAG-$region \
-              --cache-from \$DOCKER_IMAGE_REPO:buildcache \
+              --cache-from=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-$region \
+              --cache-from=\$DOCKER_IMAGE_REPO:\$TAG-$region \
+              --cache-to=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-$region,mode=max \
               -t \$DOCKER_IMAGE_REPO:\$TAG-$region \
+              -t \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region \
               --build-arg GIT_USERNAME="\$GIT_USERNAME" \
               --build-arg GIT_PASSWORD="\$GIT_PASSWORD" \
               --build-arg BUILD="\$BUILD" \
@@ -85,22 +91,22 @@ generate-regional-pipeline:
               --build-arg REACT_APP_REGION="$region" \
               --build-arg REGION="$region" \
               .
-          - echo "Deploying for region $region"
-          - docker push \$DOCKER_IMAGE_REPO:\$TAG-$region
-          - docker tag  \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region
-          - docker push \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region
-          - docker tag  \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:buildcache
-          - docker push \$DOCKER_IMAGE_REPO:buildcache
+
+          # 需要 release tag 時，直接在 registry 端重用同一個 manifest
           - |
             if [ -n "\$CI_COMMIT_TAG" ]; then
-              docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG-$region
-              docker push \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG-$region
+              docker buildx imagetools create \
+                -t \$DOCKER_IMAGE_REPO:\$CI_COMMIT_TAG-$region \
+                \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region
             fi
+
+          # 若為 hk，額外建立無尾碼 tag（同 digest）
           - |
             if [ "$region" = "hk" ]; then
-              echo "Hong Kong region detected, pushing image without suffix"
-              docker tag \$DOCKER_IMAGE_REPO:\$TAG-$region \$DOCKER_IMAGE_REPO:\$TAG
-              docker push \$DOCKER_IMAGE_REPO:\$TAG
+              echo "Hong Kong region detected, adding unsuffixed tag"
+              docker buildx imagetools create \
+                -t \$DOCKER_IMAGE_REPO:\$TAG \
+                \$DOCKER_IMAGE_REPO:\$TAG-$region
             fi
         rules:
           - if: '\$BUILD'
