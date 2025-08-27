@@ -196,8 +196,6 @@ trigger-regional-jobs:
               (env(MODE) != "held"     and ($names | all_c(. != $n)))
             )
           )
-        # 只有 region 和 digest 都不是空字串才更新
-        | select(strenv(region) != "" and strenv(digest) != "")
         | .spec.buildImages[strenv(region)] = strenv(digest)
       ' "$MANIFEST"
 
