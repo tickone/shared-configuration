@@ -185,17 +185,17 @@ trigger-regional-jobs:
       # selector:
       #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite
       #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite
-      yq -i --arg region "$region" --arg digest "$digest" '
-        (env(HOLD_SITES) // "" | split(",") | map(sub("^\\s+|\\s+$";""))) as $names
-        | .metadata.name as $n
+      yq -i '
+        . as $doc
+        | (env(HOLD_SITES) // "" | split(",") | map(sub("^\\s+|\\s+$"; ""))) as $names
         | select(
             .kind == "SimpleSite" and
             (
-              (env(MODE) == "held" and ($names | index($n)) != null) or
-              (env(MODE) != "held" and ($names | index($n)) == null)
+              (env(MODE) == "held" and (.metadata.name | IN($names))) or
+              (env(MODE) != "held" and ((.metadata.name | IN($names)) | not))
             )
           )
-        | .spec.buildImages[$region] = $digest
+        | .spec.buildImages.'"${region}"' = "'"${digest}"'"
       ' "$MANIFEST"
 
       changed=1
