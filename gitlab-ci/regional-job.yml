@@ -187,7 +187,7 @@ trigger-regional-jobs:
       #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite
       yq -i '
         # 解析 HOLD_SITES 成陣列並去頭尾空白
-        (env(HOLD_SITES) // "" | split(",") | map(sub("^\\s+|\\s+$"; ""))) as $names
+        (strenv(HOLD_SITES) | select(. != "") | split(",") | map(sub("^\\s+|\\s+$"; ""))) // [] as $names
         # 先抓出當前資源名稱
         | (.metadata.name) as $n
         # 過濾要處理的文件
