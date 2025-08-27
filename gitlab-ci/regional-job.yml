@@ -186,16 +186,20 @@ trigger-regional-jobs:
       #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite
       #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite
       yq -i '
-        . as $doc
-        | (env(HOLD_SITES) // "" | split(",") | map(sub("^\\s+|\\s+$"; ""))) as $names
+        # 解析 HOLD_SITES 成陣列並去頭尾空白
+        (env(HOLD_SITES) // "" | split(",") | map(sub("^\\s+|\\s+$"; ""))) as $names
+        # 先抓出當前資源名稱
+        | (.metadata.name) as $n
+        # 過濾要處理的文件
         | select(
             .kind == "SimpleSite" and
             (
-              (env(MODE) == "held" and (.metadata.name | IN($names))) or
-              (env(MODE) != "held" and ((.metadata.name | IN($names)) | not))
+              (env(MODE) == "held"     and ($names | any_c(. == $n))) or
+              (env(MODE) != "held"     and ($names | all_c(. != $n)))
             )
           )
-        | .spec.buildImages.'"${region}"' = "'"${digest}"'"
+        # 寫入對應 region 的 digest
+        | .spec.buildImages[strenv(region)] = strenv(digest)
       ' "$MANIFEST"
 
       changed=1
