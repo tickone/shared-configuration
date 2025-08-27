@@ -65,10 +65,10 @@ generate-regional-pipeline:
         before_script:
           - apk add --update docker-cli-buildx
           - docker version && docker buildx version || true
-          - docker buildx create --use || docker buildx use default
-          - echo \$GCP_SERVICE_ACCOUNT > /root/key.json
-          - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
-          - rm -rf /root/key.json
+          - docker buildx create --use --name gcrbuilder --driver docker-container || docker buildx use gcrbuilder
+          - docker buildx inspect --bootstrap
+          # 用 CI 變數直接管線給 docker login（變數內容應是整個 JSON）
+          - printf '%s' "$GCP_SERVICE_ACCOUNT" | docker login -u _json_key --password-stdin https://asia.gcr.io
         script:
           - echo "Building for region $region"
 
