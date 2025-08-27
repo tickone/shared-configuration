@@ -56,9 +56,9 @@ generate-regional-pipeline:
           cat >> generated-regional-pipeline.yml << EOF
       ${region}-build-docker:
         stage: regional-build
-        image: docker:stable
+        image: docker
         services:
-          - docker:stable-dind
+          - docker:dind
         variables:
           REGION_NAME: "$region"
           DOCKER_BUILDKIT: "1"
