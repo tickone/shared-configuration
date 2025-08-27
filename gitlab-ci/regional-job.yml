@@ -211,27 +211,25 @@ trigger-regional-jobs:
       #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite
       #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite
       # 在 for 迴圈內，拿到 $region 與 $digest 後：
-      REGION="$region" DIGEST="$digest" MODE="$MODE" HOLD_SITES="${HOLD_SITES:-}" \
       yq -i '
-        # HOLD_SITES 可能未設：空字串 -> []
-        (strenv(HOLD_SITES) | select(. != "") | split(",") | map(sub("^\\s+|\\s+$"; ""))) // [] as $names
-        | (.metadata.name) as $n
-        | select(
-            .kind == "SimpleSite" and
+        . as $doc
+        | (strenv(HOLD_SITES) | select(. != "") | split(",") | map(sub("^\\s+|\\s+$"; ""))) // [] as $names
+        | ($doc.metadata.name) as $n
+        | if ($doc.kind == "SimpleSite") and
             (
-              (env(MODE) == "held"     and ($names | any_c(. == $n))) or
-              (env(MODE) != "held"     and ($names | all_c(. != $n)))
+              (env(MODE) == "held" and ($names | any_c(. == $n))) or
+              (env(MODE) != "held" and ($names | all_c(. != $n)))
             )
-          )
-        # 只有 REGION 和 DIGEST 都不是空字串才更新
-        | select(strenv(REGION) != "" and strenv(DIGEST) != "")
-        | .spec.buildImages[strenv(REGION)] = strenv(DIGEST)
+          then
+            $doc
+            | select(strenv(REGION) != "" and strenv(DIGEST) != "")
+            | .spec.buildImages[strenv(REGION)] = strenv(DIGEST)
+            | .spec.buildImages |= with_entries(select(.key != "" and .value != ""))
+          else
+            $doc
+          end
       ' "$MANIFEST"
 
-      yq -i '
-        select(.kind == "SimpleSite")
-        | .spec.buildImages |= with_entries(select(.key != "" and .value != ""))
-      ' "$MANIFEST"
 
       changed=1
     done
