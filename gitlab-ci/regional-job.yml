@@ -219,7 +219,7 @@ trigger-regional-jobs:
       if [ "$MODE" = "held" ]; then
         git commit -m "chore(ci): release later sites -> write digests [skip ci]"
       else
-        git commit -m "chore(ci): bump version (auto, excluding HOLD_SITES) [skip ci]"
+        git commit -m "chore(ci): bump version [skip ci]"
       fi
       git push origin "HEAD:${CI_COMMIT_REF_NAME}"
       echo "Updated and pushed ${MANIFEST}"
