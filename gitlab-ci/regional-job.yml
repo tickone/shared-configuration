@@ -181,12 +181,6 @@ trigger-regional-jobs:
       [ -n "$digest" ] || { echo "ERROR: cannot resolve digest for ${image_ref}" >&2; exit 1; }
       echo "  -> digest: ${digest}"
 
-      yq -i '
-        select(.kind == "SimpleSite")
-        | .spec.buildImages |= with_entries(select(.key != "" and .value != ""))
-      ' "$MANIFEST"
-
-
       # names: 從 HOLD_SITES 變數轉成陣列（去前後空白）
       # selector:
       #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite
@@ -209,7 +203,10 @@ trigger-regional-jobs:
         | .spec.buildImages[strenv(REGION)] = strenv(DIGEST)
       ' "$MANIFEST"
 
-
+      yq -i '
+        select(.kind == "SimpleSite")
+        | .spec.buildImages |= with_entries(select(.key != "" and .value != ""))
+      ' "$MANIFEST"
 
       changed=1
     done
