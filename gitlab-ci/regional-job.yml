@@ -194,8 +194,8 @@ trigger-regional-jobs:
         | select(
             .kind == "SimpleSite" and
             (
-              (strenv(MODE) == "held" and ($names | index($n)) != null) or
-              (strenv(MODE) != "held" and ($names | index($n)) == null)
+              (env(MODE) == "held"     and ($names | any_c(. == $n))) or
+              (env(MODE) != "held"     and ($names | all_c(. != $n)))
             )
           )
         # 只有 REGION 和 DIGEST 都不是空字串才更新
