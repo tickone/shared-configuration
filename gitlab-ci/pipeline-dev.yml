@@ -6,7 +6,13 @@ include:
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
-
+      variables:
+        BUILD: prod
+        TAG: stable
+    - if: $CI_COMMIT_BRANCH == "beta"
+      variables:
+        BUILD: prod
+        TAG: beta
 stages:
   - pre
   - build
@@ -15,6 +21,4 @@ stages:
   - release
 
 variables:
-  BUILD: prod
-  TAG: stable
   DEV_PIPELINE: true
