@@ -11,7 +11,7 @@ workflow:
         TAG: stable
     - if: $CI_COMMIT_BRANCH == "beta"
       variables:
-        BUILD: prod
+        BUILD: beta
         TAG: beta
 stages:
   - pre
