@@ -79,7 +79,7 @@ generate-regional-pipeline:
             docker buildx build \
               --pull \
               --push \
-              --platform linux/amd64,linux/arm64 \
+              --platform linux/amd64 \
               --build-arg BUILDKIT_INLINE_CACHE=1 \
               --cache-from=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-$region \
               --cache-from=\$DOCKER_IMAGE_REPO:\$TAG-$region \
