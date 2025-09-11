@@ -84,6 +84,7 @@ generate-regional-pipeline:
               --cache-from=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-$region \
               --cache-from=\$DOCKER_IMAGE_REPO:\$TAG-$region \
               --cache-to=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-$region,mode=max \
+              --cache-to=type=inline,mode=max \
               -t \$DOCKER_IMAGE_REPO:\$TAG-$region \
               -t \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-$region \
               --build-arg GIT_USERNAME="\$GIT_USERNAME" \
