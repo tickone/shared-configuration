@@ -119,6 +119,60 @@ generate-regional-pipeline:
         fi
       done
 
+      # Special case: when DEV_PIPELINE=true, also build beta version for hk region
+      if [ "$DEV_PIPELINE" = "true" ]; then
+        echo "🔧 DEV_PIPELINE detected, adding beta build for hk region"
+        job_count=$((job_count + 1))
+
+        cat >> generated-regional-pipeline.yml << EOF
+      hk-beta-build-docker:
+        stage: regional-build
+        image: docker
+        services:
+          - docker:dind
+        variables:
+          REGION_NAME: "hk"
+          BUILD_TYPE: "beta"
+          DOCKER_BUILDKIT: "1"
+        before_script:
+          - unset DOCKER_AUTH_CONFIG
+          - apk add --update docker-cli-buildx
+          - docker version && docker buildx version || true
+          - docker buildx create --use --name gcrbuilder --driver docker-container || docker buildx use gcrbuilder
+          - docker buildx inspect --bootstrap
+          - echo \$GCP_SERVICE_ACCOUNT > /root/key.json
+          - docker login -u _json_key --password-stdin https://asia.gcr.io < /root/key.json
+          - rm -rf /root/key.json
+        script:
+          - echo "Building beta version for hk region"
+
+          # buildx：使用 registry cache + inline cache，一次推多個 tag (包含 beta tag)
+          - |
+            docker buildx build \
+              --pull \
+              --push \
+              --platform linux/amd64 \
+              --build-arg BUILDKIT_INLINE_CACHE=1 \
+              --cache-from=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-hk-beta \
+              --cache-from=\$DOCKER_IMAGE_REPO:\$TAG-hk-beta \
+              --cache-to=type=registry,ref=\$DOCKER_IMAGE_REPO:buildcache-hk-beta,mode=max \
+              --cache-to=type=inline,mode=max \
+              -t \$DOCKER_IMAGE_REPO:\$TAG-hk-beta \
+              -t \$DOCKER_IMAGE_REPO:\$CI_COMMIT_SHA-hk-beta \
+              -t \$DOCKER_IMAGE_REPO:beta \
+              --build-arg GIT_USERNAME="\$GIT_USERNAME" \
+              --build-arg GIT_PASSWORD="\$GIT_PASSWORD" \
+              --build-arg BUILD="beta" \
+              --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" \
+              --build-arg APP_ENV="\$APP_ENV" \
+              --build-arg REACT_APP_REGION="hk" \
+              --build-arg REGION="hk" \
+              .
+        rules:
+          - if: '\$DEV_PIPELINE == "true" && \$CI_COMMIT_BRANCH == "master"'
+      EOF
+      fi
+
       echo "✅ Generated $job_count jobs for regions: $REGIONS"
       echo "📄 Pipeline written to: generated-regional-pipeline.yml"
 
