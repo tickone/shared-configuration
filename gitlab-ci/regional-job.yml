@@ -169,7 +169,7 @@ generate-regional-pipeline:
               --build-arg REGION="hk" \
               .
         rules:
-          - if: '\$DEV_PIPELINE == "true" && \$CI_COMMIT_BRANCH == "master"'
+          - if: '\$DEV_PIPELINE == "true" && \$CI_COMMIT_BRANCH == "beta"'
       EOF
       fi
 
