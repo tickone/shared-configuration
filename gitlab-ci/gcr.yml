@@ -1,6 +1,6 @@
-image: docker:28.3.3-alpine3.22
+image: docker:stable
 services:
-  - docker:28.3.2-dind-alpine3.22
+  - docker:stable-dind
 
 before_script:
   - unset DOCKER_AUTH_CONFIG
