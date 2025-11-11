@@ -57,11 +57,10 @@ generate-regional-pipeline:
       ${region}-build-docker:
         stage: regional-build
         image: docker
-        services:
-          - docker:dind
         variables:
           REGION_NAME: "$region"
           DOCKER_BUILDKIT: "1"
+          DOCKER_DRIVER: "overlay2"
         before_script:
           - unset DOCKER_AUTH_CONFIG
           - apk add --update docker-cli-buildx
@@ -128,12 +127,11 @@ generate-regional-pipeline:
       hk-beta-build-docker:
         stage: regional-build
         image: docker
-        services:
-          - docker:dind
         variables:
           REGION_NAME: "hk"
           BUILD_TYPE: "beta"
           DOCKER_BUILDKIT: "1"
+          DOCKER_DRIVER: "overlay2"
         before_script:
           - unset DOCKER_AUTH_CONFIG
           - apk add --update docker-cli-buildx
