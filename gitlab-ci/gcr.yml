@@ -1,7 +1,5 @@
 image: docker:stable
-services:
-  - docker:stable-dind
-
+services: []
 before_script:
   - unset DOCKER_AUTH_CONFIG
   - echo $GCP_SERVICE_ACCOUNT > /root/key.json
