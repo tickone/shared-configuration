@@ -1,4 +1,4 @@
-image: docker:stable
+image: docker
 services: []
 before_script:
   - unset DOCKER_AUTH_CONFIG
