@@ -13,5 +13,4 @@
   stage: deploy
   script:
     - docker load < image.tar
-  after_script:
     - docker push $DOCKER_IMAGE_REPO:$TAG
