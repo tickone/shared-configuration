@@ -253,7 +253,7 @@ update-rollout-digests:
   variables:
     MODE: "auto"   # 關鍵：自動流程排除 HOLD_SITES
   rules:
-    - if: '$REGIONS && $BUILD && $TAG && $DOCKER_IMAGE_REPO && $CI_COMMIT_BRANCH != "beta"'
+    - if: '$REGIONS && $BUILD && $TAG && $DOCKER_IMAGE_REPO && $CI_COMMIT_BRANCH == "master"'
       exists:
         - deploy.yml
         - deployment.yaml
@@ -272,7 +272,7 @@ release-later:
   when: manual
   allow_failure: false
   rules:
-    - if: '$REGIONS && $BUILD && $TAG && $DOCKER_IMAGE_REPO && $HOLD_SITES && $CI_COMMIT_BRANCH != "beta"'
+    - if: '$REGIONS && $BUILD && $TAG && $DOCKER_IMAGE_REPO && $HOLD_SITES && $CI_COMMIT_BRANCH == "master"'
       exists:
         - deploy.yml
         - deployment.yaml
