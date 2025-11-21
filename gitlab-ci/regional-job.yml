@@ -17,11 +17,6 @@ generate-regional-pipeline:
         exit 1
       fi
 
-      # Ensure 'hk' is present in REGIONS
-      if ! echo ",$REGIONS," | grep -q ",hk,"; then
-        REGIONS="$REGIONS,hk"
-      fi
-
       echo "🚀 Generating pipeline for regions: $REGIONS"
 
       # Create the generated pipeline file
@@ -178,11 +173,6 @@ trigger-regional-jobs:
 
     MANIFEST="$(pick_manifest)"
     echo "Using manifest: $MANIFEST"
-
-    # Ensure 'hk' is present in REGIONS
-    if ! echo ",$REGIONS," | grep -q ",hk,"; then
-      REGIONS="$REGIONS,hk"
-    fi
 
     # yq 會用到的環境變數：
     # MODE: auto / held

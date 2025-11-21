@@ -21,10 +21,13 @@ workflow:
       variables:
         BUILD: prod
         TAG: stable
-        REGIONS: hk
+
 stages:
   - pre
   - build
   - test
   - deploy
   - release
+
+variables:
+  REGIONS: hk,th
