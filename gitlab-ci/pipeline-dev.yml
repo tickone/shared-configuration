@@ -9,7 +9,6 @@ workflow:
       variables:
         BUILD: test
         TAG: latest
-        DEV_PIPELINE: false
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         BUILD: prod
@@ -23,13 +22,9 @@ workflow:
         BUILD: prod
         TAG: stable
         REGIONS: hk
-        DEV_PIPELINE: false
 stages:
   - pre
   - build
   - test
   - deploy
   - release
-
-variables:
-  DEV_PIPELINE: true
