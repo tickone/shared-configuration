@@ -41,3 +41,7 @@ workflow:
       variables:
         BUILD: prod-2
         TAG: stable-2
+    - if: '$CI_COMMIT_BRANCH =~ /^feat\//'
+      variables:
+        BUILD: 'test'
+        TAG: 'latest'
