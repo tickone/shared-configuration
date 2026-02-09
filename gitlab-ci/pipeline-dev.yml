@@ -25,6 +25,11 @@ workflow:
         BUILD: beta
         TAG: beta
         REGIONS: hk,th
+    - if: $CI_COMMIT_BRANCH =~ /^feature\//'
+      variables:
+        BUILD: test
+        TAG: latest
+        REGIONS: hk,th
     - if: '$CI_COMMIT_TAG =~ /^(|v)(?:0|(?:[1-9]\d*))\.(?:0|(?:[1-9]\d*))\.(?:0|(?:[1-9]\d*))(?:-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/'
       variables:
         BUILD: prod
