@@ -1,0 +1,105 @@
+# Go Testing Configuration
+
+.go-test-base:
+  image: golang:1.21
+  before_script:
+    - go version
+    - go env
+    - go mod download
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .go/pkg/mod/
+
+# Unit Tests
+go-unit-test:
+  extends: .go-test-base
+  stage: test
+  script:
+    - go test -v -short ./... -coverprofile=coverage.out
+    - go tool cover -func=coverage.out
+  coverage: '/total:\s+\(statements\)\s+(\d+\.\d+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.out
+      - coverage.xml
+    expire_in: 30 days
+
+# Integration Tests
+go-integration-test:
+  extends: .go-test-base
+  stage: test
+  script:
+    - go test -v -run Integration ./...
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Race Condition Tests
+go-race-test:
+  extends: .go-test-base
+  stage: test
+  script:
+    - go test -race -short ./...
+  allow_failure: true
+
+# Code Quality - Go Vet
+go-vet:
+  extends: .go-test-base
+  stage: test
+  script:
+    - go vet ./...
+
+# Code Quality - Static Analysis
+go-staticcheck:
+  extends: .go-test-base
+  stage: test
+  before_script:
+    - go version
+    - go mod download
+    - go install honnef.co/go/tools/cmd/staticcheck@latest
+  script:
+    - staticcheck ./...
+  allow_failure: true
+
+# Security Scanning
+go-gosec:
+  extends: .go-test-base
+  stage: test
+  before_script:
+    - go version
+    - go mod download
+    - go install github.com/securego/gosec/v2/cmd/gosec@latest
+  script:
+    - gosec ./...
+  allow_failure: true
+
+# Lint Check
+go-golangci-lint:
+  extends: .go-test-base
+  image: golangci/golangci-lint:latest
+  stage: test
+  script:
+    - golangci-lint run -v
+  allow_failure: true
+
+# Build Test
+go-build-test:
+  extends: .go-test-base
+  stage: test
+  script:
+    - go build -v ./...
+
+# Dependency Check
+go-mod-verify:
+  extends: .go-test-base
+  stage: test
+  script:
+    - go mod verify
+    - go mod tidy
+    - git diff --exit-code go.mod go.sum
