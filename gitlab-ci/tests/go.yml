@@ -26,8 +26,51 @@
 go-unit-test:
   extends: .go-test-base
   stage: test
+  variables:
+    # 指定要計算覆蓋率的套件，用逗號分隔
+    # 留空 "" = 只計算有測試的套件 (推薦)
+    # "./..." = 計算所有套件
+    # "internal/handler,internal/service" = 計算指定套件（會包含沒測試的檔案）
+    COVERAGE_PACKAGES: ""
+    # 排除特定檔案不計入覆蓋率，用逗號分隔（支援萬用字元）
+    # 例如: "internal/handler/utils.go,**/mock_*.go,**/*_test_helper.go"
+    COVERAGE_EXCLUDE_FILES: ""
   script:
-    - su -s /bin/bash app -c "cd '$CI_PROJECT_DIR' && go test -v -short ./... -coverprofile=coverage.out"
+    - |
+      if [ -n "$COVERAGE_PACKAGES" ]; then
+        su -s /bin/bash app -c "cd '$CI_PROJECT_DIR' && go test -v ./... -coverpkg=${COVERAGE_PACKAGES} -coverprofile=coverage.out"
+      else
+        # 不指定 coverpkg，只計算實際有測試的套件
+        su -s /bin/bash app -c "cd '$CI_PROJECT_DIR' && go test -v ./... -coverprofile=coverage.out"
+      fi
+    # 顯示每個套件的覆蓋率明細
+    - su -s /bin/bash app -c "cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out | grep -E '(total:|\.go:)' | tail -20"
+    # 如果有指定排除檔案，則過濾 coverage.out
+    - |
+      if [ -n "$COVERAGE_EXCLUDE_FILES" ]; then
+        su -s /bin/bash app -c "
+          cd '$CI_PROJECT_DIR'
+          if [ -f coverage.out ]; then
+            # 保留第一行 (mode: set)
+            head -n 1 coverage.out > coverage.out.filtered
+            # 取得內容行
+            tail -n +2 coverage.out > coverage.out.content
+            # 對每個排除 pattern 進行過濾
+            IFS=',' read -ra EXCLUDE_ARRAY <<< \"$COVERAGE_EXCLUDE_FILES\"
+            for pattern in \"\${EXCLUDE_ARRAY[@]}\"; do
+              pattern=\$(echo \$pattern | xargs)
+              if [ -n \"\$pattern\" ]; then
+                grep -v \"\$pattern\" coverage.out.content > coverage.out.content.tmp || true
+                mv coverage.out.content.tmp coverage.out.content
+              fi
+            done
+            # 合併結果
+            cat coverage.out.content >> coverage.out.filtered
+            mv coverage.out.filtered coverage.out
+            rm -f coverage.out.content
+          fi
+        "
+      fi
     - su -s /bin/bash app -c "cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out"
   coverage: '/total:\s+\(statements\)\s+(\d+\.\d+)%/'
   artifacts:
