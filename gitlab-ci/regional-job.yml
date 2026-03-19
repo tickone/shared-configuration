@@ -4,7 +4,7 @@
 
 # Job to generate dynamic pipeline configuration using shell
 generate-regional-pipeline:
-  stage: pre
+  stage: build
   image: alpine:latest
   services: []
   before_script:
@@ -126,7 +126,7 @@ generate-regional-pipeline:
 
 # Trigger the dynamically generated regional pipeline
 trigger-regional-jobs:
-  stage: pre
+  stage: build
   needs:
     - generate-regional-pipeline
   trigger:
@@ -138,7 +138,7 @@ trigger-regional-jobs:
     - if: '$REGIONS && $BUILD && $TAG && $DOCKER_IMAGE_REPO'
 
 .update-digests-base:
-  stage: pre
+  stage: build
   variables:
     GIT_DEPTH: "0"
   script: |

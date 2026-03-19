@@ -34,13 +34,17 @@
       chown app:app /home/app/.go-env.sh
     # 設定 git credentials，讓 app 使用者能存取私有 GitLab 模組
     - |
-      if [ -n "$GIT_USERNAME" ] && [ -n "$GIT_PASSWORD" ]; then
-        printf 'machine gitlab.com\nlogin %s\npassword %s\n' "$GIT_USERNAME" "$GIT_PASSWORD" > /home/app/.netrc
+      if [ -n "$GIT_PASSWORD" ]; then
+        GIT_AUTH_USERNAME="${GIT_USERNAME:-oauth2}"
+        printf '[url "https://%s:%s@gitlab.com/"]\n\tinsteadOf = https://gitlab.com/\n' "$GIT_AUTH_USERNAME" "$GIT_PASSWORD" > /home/app/.gitconfig
+        chmod 600 /home/app/.gitconfig
+        chown app:app /home/app/.gitconfig
+        printf 'machine gitlab.com\nlogin %s\npassword %s\n' "$GIT_AUTH_USERNAME" "$GIT_PASSWORD" > /home/app/.netrc
         chmod 600 /home/app/.netrc
         chown app:app /home/app/.netrc
       fi
     # 先用 app 身份下載依賴（避免 root-owned 檔案）
-    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go mod download"
+    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s\n' \"\$(whoami)\" \"$HOME\" \"\$(command -v go)\" \"\$(test -f ~/.netrc && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:

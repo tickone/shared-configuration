@@ -28,7 +28,6 @@ workflow:
 
 stages:
   - test
-  - pre
   - build
   - deploy
   - release
