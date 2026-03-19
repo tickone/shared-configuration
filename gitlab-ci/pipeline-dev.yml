@@ -27,8 +27,8 @@ workflow:
         REGIONS: hk
 
 stages:
+  - test
   - pre
   - build
-  - test
   - deploy
   - release

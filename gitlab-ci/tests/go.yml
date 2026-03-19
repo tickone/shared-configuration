@@ -4,7 +4,6 @@
   image: golang:latest
   variables:
     # 避免 go build/test 寫到 /root
-    HOME: "/home/app"
     GOPATH: "$CI_PROJECT_DIR/.go"
     GOCACHE: "$CI_PROJECT_DIR/.cache/go-build"
     # 私有 GitLab 模組：繞過公開 module proxy 與 checksum DB
@@ -23,7 +22,7 @@
     # 把 Go 環境變數寫入 app 的 env script（su 不繼承環境變數）
     - |
       printf '%s\n' \
-        "export HOME=\"${HOME}\"" \
+        'export HOME="/home/app"' \
         "export GOPATH=\"${GOPATH}\"" \
         "export GOCACHE=\"${GOCACHE}\"" \
         "export GOPRIVATE=\"${GOPRIVATE}\"" \
