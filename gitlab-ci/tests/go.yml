@@ -33,10 +33,8 @@
       chmod 600 /home/app/.go-env.sh
       chown app:app /home/app/.go-env.sh
     # 設定 git credentials，讓 app 使用者能存取私有 GitLab 模組
-    - |
-      if [ -n "$GIT_PASSWORD" ]; then
-        echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /root/.gitconfig
-      fi
+    - echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /root/.gitconfig
+    - echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /home/app/.gitconfig
     # 先用 app 身份下載依賴（避免 root-owned 檔案）
     - su -s /bin/bash app -c "export HOME=/home/app; export USER=app; export LOGNAME=app; export GIT_CONFIG_GLOBAL=/home/app/.gitconfig; . /home/app/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s gitconfig=%s\n' \"\$(whoami)\" \"\$HOME\" \"\$(command -v go)\" \"\$(test -f /home/app/.netrc && echo present || echo missing)\" \"\$(test -f /home/app/.gitconfig && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
   cache:
