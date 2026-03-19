@@ -38,7 +38,7 @@
         echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /root/.gitconfig
       fi
     # 先用 app 身份下載依賴（避免 root-owned 檔案）
-    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s\n' \"\$(whoami)\" \"$HOME\" \"\$(command -v go)\" \"\$(test -f ~/.netrc && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
+    - su -s /bin/bash app -c "export HOME=/home/app; export USER=app; export LOGNAME=app; export GIT_CONFIG_GLOBAL=/home/app/.gitconfig; . /home/app/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s gitconfig=%s\n' \"\$(whoami)\" \"\$HOME\" \"\$(command -v go)\" \"\$(test -f /home/app/.netrc && echo present || echo missing)\" \"\$(test -f /home/app/.gitconfig && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -61,17 +61,21 @@ go-unit-test:
   script:
     - |
       if [ -n "$COVERAGE_PACKAGES" ]; then
-        su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverpkg=${COVERAGE_PACKAGES} -coverprofile=coverage.out"
+        su -s /bin/bash app -c "export HOME=/home/app; export USER=app; export LOGNAME=app; export GIT_CONFIG_GLOBAL=/home/app/.gitconfig; . /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverpkg=${COVERAGE_PACKAGES} -coverprofile=coverage.out"
       else
         # 不指定 coverpkg，只計算實際有測試的套件
-        su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverprofile=coverage.out"
+        su -s /bin/bash app -c "export HOME=/home/app; export USER=app; export LOGNAME=app; export GIT_CONFIG_GLOBAL=/home/app/.gitconfig; . /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverprofile=coverage.out"
       fi
     # 顯示每個套件的覆蓋率明細
-    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out | grep -E '(total:|\\..go:)' | tail -20"
+    - su -s /bin/bash app -c "export HOME=/home/app; export USER=app; export LOGNAME=app; export GIT_CONFIG_GLOBAL=/home/app/.gitconfig; . /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out | grep -E '(total:|\\..go:)' | tail -20"
     # 如果有指定排除檔案，則過濾 coverage.out
     - |
       if [ -n "$COVERAGE_EXCLUDE_FILES" ]; then
-        su - app -s /bin/bash -c "
+        su -s /bin/bash app -c "
+          export HOME=/home/app
+          export USER=app
+          export LOGNAME=app
+          export GIT_CONFIG_GLOBAL=/home/app/.gitconfig
           . /home/app/.go-env.sh
           cd '$CI_PROJECT_DIR'
           if [ -f coverage.out ]; then
@@ -95,7 +99,7 @@ go-unit-test:
           fi
         "
       fi
-    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out"
+    - su -s /bin/bash app -c "export HOME=/home/app; export USER=app; export LOGNAME=app; export GIT_CONFIG_GLOBAL=/home/app/.gitconfig; . /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out"
   coverage: '/total:\s+\(statements\)\s+(\d+\.\d+)%/'
   artifacts:
     reports:
