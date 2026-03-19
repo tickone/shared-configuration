@@ -16,32 +16,29 @@
     - mkdir -p "$GOPATH" "$GOCACHE"
     # 建非 root user（Debian系的 golang image 通常有 adduser）
     - adduser --disabled-password --gecos "" app || true
+    - mkdir -p /home/app
+    # 把工作目錄、快取與 home 目錄權限給 app
+    - chown -R app:app "$CI_PROJECT_DIR" /home/app
     # 把 Go 環境變數寫入 app 的 env script（su 不繼承環境變數）
     - |
       printf '%s\n' \
-        'export HOME="/root"' \
+        'export HOME="/home/app"' \
         "export PATH=\"${PATH}\"" \
         "export GOPATH=\"${GOPATH}\"" \
         "export GOCACHE=\"${GOCACHE}\"" \
         "export GOPRIVATE=\"${GOPRIVATE}\"" \
         "export GONOSUMDB=\"${GONOSUMDB}\"" \
         "export GONOPROXY=\"${GONOPROXY}\"" \
-        > /root/.go-env.sh
-      chmod 600 /root/.go-env.sh
-      chown app:app /root/.go-env.sh
+        > /home/app/.go-env.sh
+      chmod 600 /home/app/.go-env.sh
+      chown app:app /home/app/.go-env.sh
     # 設定 git credentials，讓 app 使用者能存取私有 GitLab 模組
     - |
       if [ -n "$GIT_PASSWORD" ]; then
-        GIT_AUTH_USERNAME="${GIT_USERNAME:-oauth2}"
         printf '[url "https://%s:%s@gitlab.com/"]\n\tinsteadOf = https://gitlab.com/\n' "$GIT_AUTH_USERNAME" "$GIT_PASSWORD" > /root/.gitconfig
-        chmod 600 /root/.gitconfig
-        chown app:app /root/.gitconfig
-        printf 'machine gitlab.com\nlogin %s\npassword %s\n' "$GIT_AUTH_USERNAME" "$GIT_PASSWORD" > /root/.netrc
-        chmod 600 /root/.netrc
-        chown app:app /root/.netrc
       fi
     # 先用 app 身份下載依賴（避免 root-owned 檔案）
-    - su - app -s /bin/bash -c ". /root/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s\n' \"\$(whoami)\" \"$HOME\" \"\$(command -v go)\" \"\$(test -f ~/.netrc && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
+    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s\n' \"\$(whoami)\" \"$HOME\" \"\$(command -v go)\" \"\$(test -f ~/.netrc && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -64,18 +61,18 @@ go-unit-test:
   script:
     - |
       if [ -n "$COVERAGE_PACKAGES" ]; then
-        su - app -s /bin/bash -c ". /root/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverpkg=${COVERAGE_PACKAGES} -coverprofile=coverage.out"
+        su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverpkg=${COVERAGE_PACKAGES} -coverprofile=coverage.out"
       else
         # 不指定 coverpkg，只計算實際有測試的套件
-        su - app -s /bin/bash -c ". /root/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverprofile=coverage.out"
+        su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go test -v ./... -coverprofile=coverage.out"
       fi
     # 顯示每個套件的覆蓋率明細
-    - su - app -s /bin/bash -c ". /root/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out | grep -E '(total:|\\..go:)' | tail -20"
+    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out | grep -E '(total:|\\..go:)' | tail -20"
     # 如果有指定排除檔案，則過濾 coverage.out
     - |
       if [ -n "$COVERAGE_EXCLUDE_FILES" ]; then
         su - app -s /bin/bash -c "
-          . /root/.go-env.sh
+          . /home/app/.go-env.sh
           cd '$CI_PROJECT_DIR'
           if [ -f coverage.out ]; then
             # 保留第一行 (mode: set)
@@ -98,7 +95,7 @@ go-unit-test:
           fi
         "
       fi
-    - su - app -s /bin/bash -c ". /root/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out"
+    - su - app -s /bin/bash -c ". /home/app/.go-env.sh && cd '$CI_PROJECT_DIR' && go tool cover -func=coverage.out"
   coverage: '/total:\s+\(statements\)\s+(\d+\.\d+)%/'
   artifacts:
     reports:
