@@ -6,6 +6,10 @@
     # 避免 go build/test 寫到 /root
     GOPATH: "$CI_PROJECT_DIR/.go"
     GOCACHE: "$CI_PROJECT_DIR/.cache/go-build"
+    # 私有 GitLab 模組：繞過公開 module proxy 與 checksum DB
+    GOPRIVATE: "gitlab.com/dimorder/*"
+    GONOSUMCHECK: "gitlab.com/dimorder/*"
+    GONOSUMDB: "gitlab.com/dimorder/*"
   before_script:
     - go version
     - go env
