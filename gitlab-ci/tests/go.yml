@@ -23,6 +23,7 @@
     - |
       printf '%s\n' \
         'export HOME="/home/app"' \
+        "export PATH=\"${PATH}\"" \
         "export GOPATH=\"${GOPATH}\"" \
         "export GOCACHE=\"${GOCACHE}\"" \
         "export GOPRIVATE=\"${GOPRIVATE}\"" \
