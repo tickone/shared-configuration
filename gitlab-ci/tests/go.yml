@@ -14,6 +14,13 @@
     - adduser --disabled-password --gecos "" app || true
     # 把工作目錄與快取目錄權限給 app
     - chown -R app:app "$CI_PROJECT_DIR"
+    # 設定 git credentials，讓 app 使用者能存取私有 GitLab 模組
+    - |
+      if [ -n "$GIT_USERNAME" ] && [ -n "$GIT_PASSWORD" ]; then
+        echo "machine gitlab.com login ${GIT_USERNAME} password ${GIT_PASSWORD}" > /home/app/.netrc
+        chmod 600 /home/app/.netrc
+        chown app:app /home/app/.netrc
+      fi
     # 先用 app 身份下載依賴（避免 root-owned 檔案）
     - su -s /bin/bash app -c "cd '$CI_PROJECT_DIR' && go mod download"
   cache:
