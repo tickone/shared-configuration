@@ -35,7 +35,7 @@
     # 設定 git credentials，讓 app 使用者能存取私有 GitLab 模組
     - |
       if [ -n "$GIT_PASSWORD" ]; then
-        printf '[url "https://%s:%s@gitlab.com/"]\n\tinsteadOf = https://gitlab.com/\n' "$GIT_USERNAME" "$GIT_PASSWORD" > /root/.gitconfig
+        echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /root/.gitconfig
       fi
     # 先用 app 身份下載依賴（避免 root-owned 檔案）
     - su - app -s /bin/bash -c ". /home/app/.go-env.sh && printf 'user=%s home=%s go=%s netrc=%s\n' \"\$(whoami)\" \"$HOME\" \"\$(command -v go)\" \"\$(test -f ~/.netrc && echo present || echo missing)\" && cd '$CI_PROJECT_DIR' && go mod download"
