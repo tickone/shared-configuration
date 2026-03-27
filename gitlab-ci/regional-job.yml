@@ -132,7 +132,6 @@ generate-regional-pipeline:
 # Trigger the dynamically generated regional pipeline
 trigger-regional-jobs:
   stage: build
-  retry: 2
   needs:
     - generate-regional-pipeline
   trigger:
