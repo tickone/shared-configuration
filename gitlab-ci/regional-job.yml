@@ -7,6 +7,7 @@ generate-regional-pipeline:
   stage: build
   image: alpine:latest
   services: []
+  retry: 2
   before_script:
     - echo "Starting regional pipeline generation..."
   script:
@@ -23,6 +24,9 @@ generate-regional-pipeline:
       cat > generated-regional-pipeline.yml << EOF
       # Auto-generated regional pipeline
       # Generated for regions: $REGIONS
+
+      default:
+        retry: 2
 
       stages:
         - regional-build
@@ -50,6 +54,7 @@ generate-regional-pipeline:
       ${region}-build-docker:
         stage: regional-build
         image: docker
+        retry: 2
         variables:
           REGION_NAME: "$region"
           DOCKER_BUILDKIT: "1"
@@ -127,6 +132,7 @@ generate-regional-pipeline:
 # Trigger the dynamically generated regional pipeline
 trigger-regional-jobs:
   stage: build
+  retry: 2
   needs:
     - generate-regional-pipeline
   trigger:
@@ -139,6 +145,7 @@ trigger-regional-jobs:
 
 .update-digests-base:
   stage: build
+  retry: 2
   variables:
     GIT_DEPTH: "0"
   script: |
