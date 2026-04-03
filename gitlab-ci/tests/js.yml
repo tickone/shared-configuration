@@ -1,0 +1,77 @@
+# JavaScript (Node.js) Testing Configuration
+# 參考 go.yml 設計模式，使用非 root 使用者執行指令以確保檔案權限一致性
+
+.js-test-base:
+  image: node:latest
+  variables:
+    # 設定 npm 快取路徑，避免寫入 /root
+    npm_config_cache: "$CI_PROJECT_DIR/.npm"
+    NODE_ENV: "test"
+  before_script:
+    - node -v
+    - npm -v
+    - mkdir -p "$npm_config_cache"
+    # 建立非 root user (Debian/Alpine 系統通用做法)
+    - adduser --disabled-password --gecos "" app || true
+    - mkdir -p /home/app
+    # 授權工作目錄與快取給 app 使用者
+    - chown -R app:app "$CI_PROJECT_DIR" /home/app
+    # 設定環境變數腳本，讓 su 執行時能繼承正確的路徑
+    - |
+      printf '%s\n' \
+        'export HOME="/home/app"' \
+        "export PATH=\"${PATH}\"" \
+        "export npm_config_cache=\"${npm_config_cache}\"" \
+        > /home/app/.js-env.sh
+      chmod 600 /home/app/.js-env.sh
+      chown app:app /home/app/.js-env.sh
+    # 設定 Git Credentials，讓 npm 能存取私有 GitLab Registry 或模組
+    - echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /root/.gitconfig
+    - echo -e "[url \"https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/\"]\n\tinsteadOf = https://gitlab.com/" > /home/app/.gitconfig
+    # 以 app 使用者身分執行 npm install，確保 node_modules 權限正確
+    - su -s /bin/bash app -c "export HOME=/home/app; export USER=app; . /home/app/.js-env.sh && cd '$CI_PROJECT_DIR' && npm ci"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+      - node_modules/
+
+# Unit Tests (Jest/Mocha)
+js-unit-test:
+  extends: .js-test-base
+  stage: test
+  variables:
+    # 允許透過變數傳遞額外的測試參數（例如排除特定檔案）
+    TEST_PARAMS: ""
+  script:
+    - |
+      if [ -n "$TEST_PARAMS" ]; then
+        su -s /bin/bash app -c "export HOME=/home/app; . /home/app/.js-env.sh && cd '$CI_PROJECT_DIR' && npm test -- $TEST_PARAMS"
+      else
+        su -s /bin/bash app -c "export HOME=/home/app; . /home/app/.js-env.sh && cd '$CI_PROJECT_DIR' && npm test"
+      fi
+    # 範例：如果使用 jest，可以抓取測試結果摘要 (需根據實際使用的 framework 修改)
+    - su -s /bin/bash app -c "export HOME=/home/app; . /home/app/.js-env.sh && cd '$CI_PROJECT_DIR' && npm run test:summary || true"
+  coverage: '/All files passed|Tests:\s+(\d+)/' # 這里的 Regex 需根據你的測試工具 (Jest/Vitest) 修改
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+      - junit.xml
+    expire_in: 30 days
+
+# Lint Check (ESLint)
+js-lint:
+  extends: .js-test-base
+  stage: test
+  script:
+    - su -s /bin/bash app -c "export HOME=/home/app; . /home/app/.js-env.sh && cd '$CI_PROJECT_DIR' && npm run lint"
+  allow_failure: true
+
+# Security Scanning (npm audit)
+js-audit:
+  extends: .js-test-base
+  stage: test
+  script:
+    - su -s /bin/bash app -c "export HOME=/home/app; . /home/app/.js-env.sh && cd '$CI_PROJECT_DIR' && npm audit"
+  allow_failure: true
