@@ -88,6 +88,7 @@ generate-regional-pipeline:
               --build-arg GIT_PASSWORD="\$GIT_PASSWORD" \
               --build-arg BUILD="\$BUILD" \
               --build-arg CI_COMMIT_SHA="\$CI_COMMIT_SHA" \
+              --build-arg CI_COMMIT_SHORT_SHA="\$CI_COMMIT_SHORT_SHA" \
               --build-arg APP_ENV="\$APP_ENV" \
               --build-arg REACT_APP_REGION="$region" \
               --build-arg REGION="$region" \

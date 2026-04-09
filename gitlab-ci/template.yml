@@ -2,7 +2,7 @@
   stage: build
   retry: 2
   script:
-    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg GIT_USERNAME="${GIT_USERNAME}" --build-arg GIT_PASSWORD="${GIT_PASSWORD}" --build-arg BUILD="${BUILD}" --build-arg CI_COMMIT_SHA="${CI_COMMIT_SHA}" --build-arg APP_ENV="${APP_ENV}"
+    - docker build . -t $DOCKER_IMAGE_REPO:$TAG --build-arg GIT_USERNAME="${GIT_USERNAME}" --build-arg GIT_PASSWORD="${GIT_PASSWORD}" --build-arg BUILD="${BUILD}" --build-arg CI_COMMIT_SHA="${CI_COMMIT_SHA}" --build-arg CI_COMMIT_SHORT_SHA="${CI_COMMIT_SHORT_SHA}" --build-arg APP_ENV="${APP_ENV}"
     - docker save $DOCKER_IMAGE_REPO:$TAG > image.tar
   artifacts:
     paths:
