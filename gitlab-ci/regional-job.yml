@@ -239,14 +239,18 @@ trigger-regional-jobs:
 
     if [ "$changed" -eq 1 ]; then
       git add "$MANIFEST"
-      # 訊息依情境標示
-      if [ "$MODE" = "held" ]; then
-        git commit -m "chore(ci): release later sites -> write digests [skip ci]"
+      if git diff --cached --quiet; then
+        echo "No changes to commit (manifest unchanged)."
       else
-        git commit -m "chore(ci): bump version [skip ci]"
+        # 訊息依情境標示
+        if [ "$MODE" = "held" ]; then
+          git commit -m "chore(ci): release later sites -> write digests [skip ci]"
+        else
+          git commit -m "chore(ci): bump version [skip ci]"
+        fi
+        git push origin "HEAD:${CI_COMMIT_REF_NAME}"
+        echo "Updated and pushed ${MANIFEST}"
       fi
-      git push origin "HEAD:${CI_COMMIT_REF_NAME}"
-      echo "Updated and pushed ${MANIFEST}"
     else
       echo "No changes to commit."
     fi
