@@ -184,7 +184,7 @@ trigger-regional-jobs:
 
     # yq 會用到的環境變數：
     # MODE: auto / held
-    # HOLD_SITES: 逗號分隔的 SimpleSite 名稱
+    # HOLD_SITES: 逗號分隔的 SimpleSite/SimpleGrpc 名稱
     export MODE="${MODE:-auto}"
     export HOLD_SITES="${HOLD_SITES:-}"
 
@@ -205,8 +205,8 @@ trigger-regional-jobs:
 
       # names: 從 HOLD_SITES 變數轉成陣列（去前後空白）
       # selector:
-      #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite
-      #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite
+      #   MODE=held -> 只選在 HOLD_SITES 裡的 SimpleSite/SimpleGrpc
+      #   MODE=auto -> 排除在 HOLD_SITES 裡的 SimpleSite/SimpleGrpc
       # 在 for 迴圈內，拿到 $region 與 $digest 後：
       REGION="$region" DIGEST="$digest" MODE="$MODE" HOLD_SITES="${HOLD_SITES:-}" \
       yq -i '
@@ -215,7 +215,7 @@ trigger-regional-jobs:
         | .metadata.name as $n
         | ($names | map(select(. == $n)) | length) as $cnt
         | (
-            select( .kind == "SimpleSite" and
+            select( (.kind == "SimpleSite" or .kind == "SimpleGrpc") and
                     (
                       (env(MODE) == "held" and ($cnt > 0)) or
                       (env(MODE) != "held" and ($cnt == 0))
