@@ -19,12 +19,23 @@ jobs:
       - name: Check AWS CLI
         run: aws --version
 
-      - name: Upload
+      - name: Upload to R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: auto
         run: |
-          aws s3 sync . s3://$R2_BUCKET \
-            --endpoint-url $R2_ENDPOINT \
-            --delete
+          aws s3 sync . "s3://$R2_BUCKET" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude ".workflow/*" \
+            --exclude ".gitignore" \
+            --exclude "README.md" \
+            --exclude "LICENSE" \
+            --exclude "LICENSE.*" \
+            --exclude ".env" \
+            --exclude ".env.*" \
+            --exclude "node_modules/*" \
+            --exclude "vendor/*"
