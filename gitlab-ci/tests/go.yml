@@ -11,6 +11,7 @@
     GONOSUMDB: "gitlab.com/dimorder/*"
     GONOPROXY: "gitlab.com/dimorder/*"
     GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
+    TZ: Asia/Hong_Kong
   before_script:
     - go version
     - go env
