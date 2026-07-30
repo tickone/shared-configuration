@@ -10,6 +10,7 @@
     GOPRIVATE: "gitlab.com/dimorder/*"
     GONOSUMDB: "gitlab.com/dimorder/*"
     GONOPROXY: "gitlab.com/dimorder/*"
+    GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
   before_script:
     - go version
     - go env
