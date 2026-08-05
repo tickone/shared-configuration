@@ -25,6 +25,7 @@ workflow:
         BUILD: prod
         TAG: stable
         REGIONS: hk
+    - when: always
 
 stages:
   - test
