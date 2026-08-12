@@ -33,7 +33,8 @@ workflow:
         BUILD: prod
         TAG: stable
         REGIONS: hk
-    - when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - when: never
 
 stages:
   - test
