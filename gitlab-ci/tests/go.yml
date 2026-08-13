@@ -58,7 +58,7 @@ go-unit-test:
     COVERAGE_PACKAGES: ""
     # 排除特定檔案不計入覆蓋率，用逗號分隔（支援萬用字元）
     # 例如: "internal/handler/utils.go,**/mock_*.go,**/*_test_helper.go"
-    COVERAGE_EXCLUDE_FILES: ""
+    COVERAGE_EXCLUDE_FILES: /proto/
   script:
     - |
       if [ -n "$COVERAGE_PACKAGES" ]; then
