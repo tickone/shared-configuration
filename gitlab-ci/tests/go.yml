@@ -12,6 +12,7 @@
     GONOPROXY: "gitlab.com/dimorder/*"
     GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
     TZ: Asia/Hong_Kong
+    COVERAGE_EXCLUDE_FILES: '/proto/'
   before_script:
     - go version
     - go env
